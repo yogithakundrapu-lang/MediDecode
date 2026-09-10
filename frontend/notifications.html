@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Notifications — MediDecode</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <div
+        id="app-sidebar"
+        data-active="notifications">
+    </div>
+
+
+    <!-- MAIN COLUMN -->
+    <div class="main-col">
+
+        <!-- TOPBAR -->
+        <div
+            id="app-topbar"
+            data-title-key="notifications"
+            data-subtitle-key="stay_updated">
+        </div>
+
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <div
+                class="card"
+                style="max-width:760px;"
+            >
+
+                <!-- HEADER -->
+                <div
+                    style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        margin-bottom:6px;
+                    "
+                >
+
+                    <h3
+                        style="
+                            margin:0;
+                            font-size:16px;
+                        "
+                        data-i18n="recent"
+                    >
+                        Recent
+                    </h3>
+
+
+                    <button
+                        class="btn btn-outline"
+                        id="clear-all-btn"
+                        data-i18n="mark_all_as_read"
+                    >
+                        Mark all as read
+                    </button>
+
+                </div>
+
+
+                <!-- NOTIFICATION LIST -->
+                <div id="notif-list"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- APP SHELL -->
+<script src="js/app-shell.js"></script>
+
+<!-- TRANSLATIONS -->
+<script src="js/i18n.js"></script>
+
+
+<script>
+
+/* ============================================================
+   MEDIDECODE NOTIFICATIONS
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   GET LOGGED-IN USER ID
+   ------------------------------------------------------------ */
+
+function getUserId() {
+
+    return localStorage.getItem("medidecode_user_id");
+
+}
+
+
+/* ------------------------------------------------------------
+   NOTIFICATION ICON / COLORS
+   ------------------------------------------------------------ */
+
+function getNotificationIcon(type) {
+
+    if (type === "report") {
+
+        return {
+            icon: "📄",
+            bg: "var(--color-primary-light)",
+            color: "var(--color-primary)"
+        };
+
+    }
+
+
+    if (type === "health") {
+
+        return {
+            icon: "⚠️",
+            bg: "var(--color-red-light)",
+            color: "var(--color-red)"
+        };
+
+    }
+
+
+    if (type === "medicine") {
+
+        return {
+            icon: "💊",
+            bg: "var(--color-green-light)",
+            color: "var(--color-green)"
+        };
+
+    }
+
+
+    if (type === "appointment") {
+
+        return {
+            icon: "📅",
+            bg: "var(--color-amber-light)",
+            color: "var(--color-amber)"
+        };
+
+    }
+
+
+    return {
+        icon: "🔔",
+        bg: "var(--color-primary-light)",
+        color: "var(--color-primary)"
+    };
+
+}
+
+
+/* ------------------------------------------------------------
+   FORMAT DATE / TIME
+   ------------------------------------------------------------ */
+
+function formatTime(dateString) {
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+
+    const now = new Date();
+
+    const difference =
+        Math.floor((now - date) / 1000);
+
+
+    if (difference < 60) {
+
+        return "Just now";
+
+    }
+
+
+    if (difference < 3600) {
+
+        return Math.floor(difference / 60) + "m ago";
+
+    }
+
+
+    if (difference < 86400) {
+
+        return Math.floor(difference / 3600) + "h ago";
+
+    }
+
+
+    if (difference < 172800) {
+
+        return "Yesterday";
+
+    }
+
+
+    const days =
+        Math.floor(difference / 86400);
+
+
+    if (days < 7) {
+
+        return days + " days ago";
+
+    }
+
+
+    return date.toLocaleDateString();
+
+}
+
+
+/* ------------------------------------------------------------
+   ESCAPE HTML
+   ------------------------------------------------------------ */
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+
+}
+
+
+/* ------------------------------------------------------------
+   LOAD NOTIFICATIONS
+   ------------------------------------------------------------ */
+
+async function loadNotifications() {
+
+    const notifList =
+        document.getElementById("notif-list");
+
+
+    const userId =
+        getUserId();
+
+
+    /* USER NOT LOGGED IN */
+
+    if (!userId) {
+
+        notifList.innerHTML = `
+
+            <div class="list-item">
+
+                <div
+                    class="list-icon"
+                    style="
+                        background:var(--color-primary-light);
+                        color:var(--color-primary);
+                    "
+                >
+                    🔔
+                </div>
+
+                <div>
+
+                    <h4>No user session</h4>
+
+                    <p>
+                        Please log in to view your notifications.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/notifications",
+                {
+                    method: "GET",
+
+                    headers: {
+                        "X-User-ID": userId
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Failed to load notifications"
+            );
+
+        }
+
+
+        const notifications =
+            data.notifications || [];
+
+
+        /* CLEAR OLD LIST */
+
+        notifList.innerHTML = "";
+
+
+        /* NO NOTIFICATIONS */
+
+        if (notifications.length === 0) {
+
+            notifList.innerHTML = `
+
+                <div class="list-item">
+
+                    <div
+                        class="list-icon"
+                        style="
+                            background:var(--color-primary-light);
+                            color:var(--color-primary);
+                        "
+                    >
+                        🔔
+                    </div>
+
+                    <div>
+
+                        <h4>No notifications yet</h4>
+
+                        <p>
+                            You are all caught up.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            updateUnreadCount(0);
+
+            return;
+
+        }
+
+
+        /* CREATE NOTIFICATION ITEMS */
+
+        notifications.forEach(
+            notification => {
+
+                const visual =
+                    getNotificationIcon(
+                        notification.type
+                    );
+
+
+                const item =
+                    document.createElement("div");
+
+
+                item.className =
+                    "list-item";
+
+
+                /* UNREAD NOTIFICATION */
+
+                if (!notification.is_read) {
+
+                    item.setAttribute(
+                        "data-unread",
+                        "true"
+                    );
+
+                }
+
+
+                item.dataset.notificationId =
+                    notification.id;
+
+
+                item.innerHTML = `
+
+                    <div
+                        class="list-icon"
+                        style="
+                            background:${visual.bg};
+                            color:${visual.color};
+                        "
+                    >
+                        ${visual.icon}
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            ${escapeHtml(
+                                notification.title
+                            )}
+                        </h4>
+
+                        <p>
+                            ${escapeHtml(
+                                notification.message
+                            )}
+                        </p>
+
+                    </div>
+
+
+                    <span class="time">
+
+                        ${formatTime(
+                            notification.created_at
+                        )}
+
+                    </span>
+
+                `;
+
+
+                /* CLICK NOTIFICATION */
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        if (!notification.is_read) {
+
+                            markAsRead(
+                                notification.id,
+                                item
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                notifList.appendChild(item);
+
+            }
+        );
+
+
+        /* UPDATE UNREAD COUNT */
+
+        const unreadCount =
+            notifications.filter(
+                notification =>
+                    !notification.is_read
+            ).length;
+
+
+        updateUnreadCount(
+            unreadCount
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Notification loading error:",
+            error
+        );
+
+
+        notifList.innerHTML = `
+
+            <div class="list-item">
+
+                <div
+                    class="list-icon"
+                    style="
+                        background:var(--color-red-light);
+                        color:var(--color-red);
+                    "
+                >
+                    ⚠️
+                </div>
+
+                <div>
+
+                    <h4>
+                        Unable to load notifications
+                    </h4>
+
+                    <p>
+                        Please try again.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------
+   MARK ONE NOTIFICATION AS READ
+   ------------------------------------------------------------ */
+
+async function markAsRead(
+    notificationId,
+    element
+) {
+
+    const userId =
+        getUserId();
+
+
+    if (!userId) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/notifications/${notificationId}/read`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "X-User-ID": userId
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            return;
+
+        }
+
+
+        /* REMOVE UNREAD STATUS */
+
+        element.removeAttribute(
+            "data-unread"
+        );
+
+
+        /* REFRESH COUNT */
+
+        updateUnreadCount();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Mark notification read error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------
+   MARK ALL NOTIFICATIONS AS READ
+   ------------------------------------------------------------ */
+
+async function markAllAsRead() {
+
+    const userId =
+        getUserId();
+
+
+    if (!userId) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/notifications/mark-all-read",
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "X-User-ID": userId
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Failed to mark notifications as read"
+            );
+
+        }
+
+
+        /* REMOVE UNREAD STATUS FROM UI */
+
+        document
+            .querySelectorAll(
+                '.list-item[data-unread="true"]'
+            )
+            .forEach(
+                item => {
+
+                    item.removeAttribute(
+                        "data-unread"
+                    );
+
+                }
+            );
+
+
+        /* SET COUNT TO ZERO */
+
+        updateUnreadCount(0);
+
+
+        /* SHOW TOAST */
+
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                typeof t === "function"
+                    ? t("all_notifications_read")
+                    : "All notifications marked as read"
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Mark all notifications error:",
+            error
+        );
+
+
+        if (
+            typeof showToast === "function"
+        ) {
+
+            showToast(
+                "Unable to update notifications"
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------
+   GET / UPDATE UNREAD COUNT
+   ------------------------------------------------------------ */
+
+async function updateUnreadCount(
+    count = null
+) {
+
+    const userId =
+        getUserId();
+
+
+    if (!userId) {
+
+        return;
+
+    }
+
+
+    try {
+
+        /* IF COUNT WAS NOT PROVIDED,
+           GET IT FROM BACKEND */
+
+        if (count === null) {
+
+            const response =
+                await fetch(
+                    "/api/notifications/unread-count",
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "X-User-ID": userId
+                        }
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (response.ok) {
+
+                count =
+                    data.unread_count || 0;
+
+            }
+
+        }
+
+
+        /* SAVE COUNT */
+
+        localStorage.setItem(
+            "medidecode_notif_count",
+            String(count)
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Unread count error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------
+   MARK ALL BUTTON
+   ------------------------------------------------------------ */
+
+document
+    .getElementById("clear-all-btn")
+    .addEventListener(
+        "click",
+        markAllAsRead
+    );
+
+
+/* ------------------------------------------------------------
+   LOAD NOTIFICATIONS WHEN PAGE OPENS
+   ------------------------------------------------------------ */
+
+loadNotifications();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="settings"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="settings" data-subtitle-key="dashboard_subtitle"></div>
+
+    <div class="content">
+      <div class="grid-2-1-1">
+        <div class="card">
+          <h3 style="margin:0 0 6px;font-size:16px;" data-i18n="appearance">Appearance</h3>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="dark_mode">Dark Mode</div><div class="s-sub" data-i18n="dark_mode_description">Switch to a darker color theme</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="language">Language</div><div class="s-sub" data-i18n="language_description">Choose your preferred app language</div></div>
+            <select id="lang-select" class="field" style="margin:0;width:150px;">
+              <option value="en">English</option>
+              <option value="te">తెలుగు</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </div>
+
+          <h3 style="margin:26px 0 6px;font-size:16px;" data-i18n="notifications_settings">Notifications</h3>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="report_updates">Report Updates</div><div class="s-sub" data-i18n="report_updates_description">Get notified when a report finishes processing</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="report-updates-toggle" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="medicine_reminders">Medicine Reminders</div><div class="s-sub" data-i18n="medicine_reminders_description">Daily reminders for medication</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="medicine-reminders-toggle" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="health_alerts">Health Alerts</div><div class="s-sub" data-i18n="health_alerts_description">Alerts for abnormal report values</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="health-alerts-toggle" checked><span class="toggle-slider"></span></label>
+          </div>
+
+          <h3 style="margin:26px 0 6px;font-size:16px;" data-i18n="privacy_security">Privacy &amp; Security</h3>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="two_factor_authentication">Two-Factor Authentication</div><div class="s-sub" data-i18n="two_factor_description">Add an extra layer of security to your account</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="two-factor-toggle"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div><div class="s-label" data-i18n="share_data_for_research">Share Data for Research</div><div class="s-sub" data-i18n="share_data_description">Anonymised data helps improve MediDecode</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="share-data-toggle"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="account">Account</h3>
+          <button id="edit-profile-btn" class="btn btn-outline btn-block" style="margin-bottom:12px;" onclick="window.location.href='profile.html'" data-i18n="edit_profile">Edit Profile</button>
+          <button id="change-password-btn" class="btn btn-outline btn-block" style="margin-bottom:12px;" type="button" data-i18n="change_password">Change Password</button>
+          <button id="download-data-btn" class="btn btn-outline btn-block" style="margin-bottom:12px;" type="button" data-i18n="download_my_data">Download My Data</button>
+          <button id="delete-account-btn" class="btn btn-block" style="background:var(--color-red-light);color:var(--color-red);" type="button" data-i18n="delete_account">Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="password-modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+    <div class="modal-header">
+      <h3 id="password-modal-title" data-i18n="change_password">Change Password</h3>
+      <button type="button" class="modal-close" aria-label="Close" id="close-password-modal">×</button>
+    </div>
+    <form id="change-password-form">
+      <div class="modal-body">
+        <div class="field no-icon modal-field">
+          <label for="current-password" data-i18n="current_password">Current Password</label>
+          <input id="current-password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field no-icon modal-field">
+          <label for="new-password" data-i18n="new_password">New Password</label>
+          <input id="new-password" type="password" autocomplete="new-password" required>
+        </div>
+        <div class="field no-icon modal-field">
+          <label for="confirm-password" data-i18n="confirm_new_password">Confirm New Password</label>
+          <input id="confirm-password" type="password" autocomplete="new-password" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancel-password-btn" data-i18n="cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" data-i18n="save_changes">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="delete-modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-header">
+      <h3 id="delete-modal-title" data-i18n="delete_account">Delete Account</h3>
+      <button type="button" class="modal-close" aria-label="Close" id="close-delete-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-text" data-i18n="delete_account_warning">This action is permanent and cannot be undone. Your medical records and profile data will be removed after confirmation.</p>
+      <div class="field no-icon modal-field">
+        <label for="delete-confirm-password" data-i18n="current_password">Current Password</label>
+        <input id="delete-confirm-password" type="password" autocomplete="current-password" placeholder="Enter your current password">
+      </div>
+      <div class="field no-icon modal-field">
+        <label for="delete-confirm-text" data-i18n="delete_account_confirm_label">Type DELETE MY ACCOUNT to confirm</label>
+        <input id="delete-confirm-text" type="text" autocomplete="off" data-i18n-placeholder="delete_account_confirm_placeholder" placeholder="DELETE MY ACCOUNT">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="cancel-delete-btn" data-i18n="cancel">Cancel</button>
+      <button type="button" class="btn btn-block" id="confirm-delete-btn" style="background:var(--color-red-light);color:var(--color-red);border-color:transparent;" data-i18n="delete_account">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  const settingsApiUrl = "http://127.0.0.1:5000/api/users/me/settings";
+  const userId = localStorage.getItem("medidecode_user_id");
+
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  async function persistSettings(payload) {
+    if (!userId) {
+      Object.entries(payload).forEach(([key, value]) => {
+        if (key === "preferred_language") {
+          localStorage.setItem("medidecode_lang", value);
+        } else if (key === "dark_mode") {
+          localStorage.setItem("medidecode_dark", String(Boolean(value)));
+        } else if (key.startsWith("notify_")) {
+          localStorage.setItem(`medidecode_${key}`, String(Boolean(value)));
+        }
+      });
+      return { ok: true };
+    }
+
+    try {
+      const response = await fetch(settingsApiUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-ID": userId
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to save settings");
+      }
+      return data;
+    } catch (error) {
+      console.error("SETTINGS SAVE ERROR:", error);
+      throw error;
+    }
+  }
+
+  async function loadSettings() {
+    const fallback = {
+      preferred_language: localStorage.getItem("medidecode_lang") || "en",
+      dark_mode: localStorage.getItem("medidecode_dark") === "true",
+      notify_report_updates: localStorage.getItem("medidecode_notify_report_updates") !== "false",
+      notify_medicine_reminders: localStorage.getItem("medidecode_notify_medicine_reminders") !== "false",
+      notify_health_alerts: localStorage.getItem("medidecode_notify_health_alerts") !== "false",
+      share_data_for_research: localStorage.getItem("medidecode_share_data_for_research") === "true",
+      two_factor_authentication: localStorage.getItem("medidecode_two_factor_authentication") === "true"
+    };
+
+    if (!userId) {
+      return fallback;
+    }
+
+    try {
+      const response = await fetch(settingsApiUrl, {
+        headers: {
+          "X-User-ID": userId
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load settings");
+      }
+
+      return {
+        ...fallback,
+        ...data.settings
+      };
+    } catch (error) {
+      console.warn("Using fallback settings values:", error.message);
+      return fallback;
+    }
+  }
+
+  function applySettingsState(settings) {
+    const darkToggle = document.getElementById("dark-mode-toggle");
+    const langSelect = document.getElementById("lang-select");
+    const toggles = {
+      "report-updates-toggle": settings.notify_report_updates,
+      "medicine-reminders-toggle": settings.notify_medicine_reminders,
+      "health-alerts-toggle": settings.notify_health_alerts,
+      "two-factor-toggle": settings.two_factor_authentication,
+      "share-data-toggle": settings.share_data_for_research
+    };
+
+    darkToggle.checked = Boolean(settings.dark_mode);
+    langSelect.value = settings.preferred_language || "en";
+
+    Object.entries(toggles).forEach(([id, checked]) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = Boolean(checked);
+    });
+
+    localStorage.setItem("medidecode_lang", settings.preferred_language || "en");
+    localStorage.setItem("medidecode_dark", String(Boolean(settings.dark_mode)));
+    localStorage.setItem("medidecode_notify_report_updates", String(Boolean(settings.notify_report_updates)));
+    localStorage.setItem("medidecode_notify_medicine_reminders", String(Boolean(settings.notify_medicine_reminders)));
+    localStorage.setItem("medidecode_notify_health_alerts", String(Boolean(settings.notify_health_alerts)));
+    localStorage.setItem("medidecode_share_data_for_research", String(Boolean(settings.share_data_for_research)));
+    localStorage.setItem("medidecode_two_factor_authentication", String(Boolean(settings.two_factor_authentication)));
+    applyDarkModePreference();
+  }
+
+  document.getElementById("lang-select").addEventListener("change", async (e) => {
+    const nextLang = e.target.value;
+    setLanguage(nextLang);
+    renderTopbar();
+
+    try {
+      await persistSettings({ preferred_language: nextLang });
+      showToast(t("language_updated"));
+    } catch (error) {
+      showToast(error.message || t("language_updated"));
+    }
+  });
+
+  document.getElementById("dark-mode-toggle").addEventListener("change", async (e) => {
+    const checked = e.target.checked;
+    localStorage.setItem("medidecode_dark", checked);
+    applyDarkModePreference();
+
+    try {
+      await persistSettings({ dark_mode: checked });
+      showToast(checked ? t("dark_mode_enabled") : t("dark_mode_disabled"));
+    } catch (error) {
+      showToast(checked ? t("dark_mode_enabled") : t("dark_mode_disabled"));
+    }
+  });
+
+  [
+    ["report-updates-toggle", "notify_report_updates", "notification_preference_updated"],
+    ["medicine-reminders-toggle", "notify_medicine_reminders", "notification_preference_updated"],
+    ["health-alerts-toggle", "notify_health_alerts", "notification_preference_updated"],
+    ["share-data-toggle", "share_data_for_research", "settings_saved"],
+    ["two-factor-toggle", "two_factor_authentication", "settings_saved"]
+  ].forEach(([inputId, settingKey, toastKey]) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.addEventListener("change", async (e) => {
+      const payload = {};
+      payload[settingKey] = e.target.checked;
+
+      try {
+        await persistSettings(payload);
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem(`medidecode_${settingKey}`, String(Boolean(e.target.checked)));
+        }
+        showToast(t(toastKey) || t("notification_preference_updated"));
+      } catch (error) {
+        showToast(error.message || t("notification_preference_updated"));
+      }
+    });
+  });
+
+  document.getElementById("change-password-btn").addEventListener("click", () => openModal("password-modal"));
+  document.getElementById("close-password-modal").addEventListener("click", () => closeModal("password-modal"));
+  document.getElementById("cancel-password-btn").addEventListener("click", () => closeModal("password-modal"));
+
+  document.getElementById("delete-account-btn").addEventListener("click", () => openModal("delete-modal"));
+  document.getElementById("close-delete-modal").addEventListener("click", () => closeModal("delete-modal"));
+  document.getElementById("cancel-delete-btn").addEventListener("click", () => closeModal("delete-modal"));
+
+  document.getElementById("change-password-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast(t("fill_all_fields"));
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showToast(t("password_length_error"));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast(t("passwords_do_not_match"));
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/users/me/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-ID": userId
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_new_password: confirmPassword
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Password change failed");
+      }
+
+      document.getElementById("change-password-form").reset();
+      closeModal("password-modal");
+      showToast(t("password_changed_successfully"));
+    } catch (error) {
+      console.error("PASSWORD CHANGE ERROR:", error);
+      showToast(error.message || t("password_change_failed"));
+    }
+  });
+
+  document.getElementById("confirm-delete-btn").addEventListener("click", async () => {
+    const password = document.getElementById("delete-confirm-password").value;
+    const confirmText = document.getElementById("delete-confirm-text").value.trim();
+
+    if (!password || confirmText !== "DELETE MY ACCOUNT") {
+      showToast(t("delete_account_confirmation_required"));
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/users/me/delete-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-ID": userId
+        },
+        body: JSON.stringify({
+          password,
+          confirm_text: confirmText
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Account deletion failed");
+      }
+
+      closeModal("delete-modal");
+      localStorage.clear();
+      showToast(t("account_deleted_successfully"));
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1200);
+    } catch (error) {
+      console.error("DELETE ACCOUNT ERROR:", error);
+      showToast(error.message || t("delete_account_failed"));
+    }
+  });
+
+  document.getElementById("download-data-btn").addEventListener("click", async () => {
+    if (!userId) {
+      showToast(t("please_login_first"));
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/users/me/export-data`, {
+        headers: {
+          "X-User-ID": userId
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to download data");
+      }
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "medidecode-user-data.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast(t("data_download_started"));
+    } catch (error) {
+      console.error("DATA DOWNLOAD ERROR:", error);
+      showToast(error.message || t("data_download_failed"));
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    document.getElementById("lang-select").value = localStorage.getItem("medidecode_lang") || "en";
+    document.getElementById("dark-mode-toggle").checked = localStorage.getItem("medidecode_dark") === "true";
+    
+    const settings = await loadSettings();
+    applySettingsState(settings);
+    applyTranslations();
+  });
+</script>
+</body>
+</html>

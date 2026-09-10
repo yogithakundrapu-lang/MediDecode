@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="support"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="feedback" data-subtitle-key="improve_experience"></div>
+
+    <div class="content">
+      <div class="card" style="max-width:600px;">
+        <h3 style="margin:0 0 4px;font-size:16px;" data-i18n="rate_experience">How would you rate your experience?</h3>
+        <p style="margin:0 0 16px;font-size:13px;color:var(--color-text-muted);" data-i18n="feedback_intro">Your feedback directly shapes upcoming features.</p>
+
+        <div style="display:flex;gap:10px;margin-bottom:22px;" id="star-rating">
+          <span data-star="1" class="star">★</span>
+          <span data-star="2" class="star">★</span>
+          <span data-star="3" class="star">★</span>
+          <span data-star="4" class="star">★</span>
+          <span data-star="5" class="star">★</span>
+        </div>
+
+        <form id="feedback-form">
+          <div class="field no-icon">
+            <label data-i18n="feedback_text_label">What did you like or want improved?</label>
+            <textarea id="feedback-text" data-i18n-placeholder="feedback_placeholder" placeholder="Share your thoughts about MediDecode…" required></textarea>
+          </div>
+          <div class="field no-icon">
+            <label data-i18n="feedback_category_label">Category</label>
+            <select id="feedback-category">
+              <option data-i18n="feedback_option_accuracy">Report Accuracy</option>
+              <option data-i18n="feedback_option_design">App Design</option>
+              <option data-i18n="feedback_option_performance">Performance</option>
+              <option data-i18n="feedback_option_feature">New Feature Request</option>
+              <option data-i18n="feedback_option_other">Other</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" data-i18n="submit_feedback">Submit Feedback</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<style>
+  .star { font-size: 30px; color: var(--color-border); cursor: pointer; transition: color 0.15s ease; }
+  .star.active { color: var(--color-amber); }
+</style>
+<script>
+  let rating = 0;
+
+  // Star rating
+  document.querySelectorAll(".star").forEach((star) => {
+    star.addEventListener("click", () => {
+      rating = Number(star.dataset.star);
+
+      document.querySelectorAll(".star").forEach((s) => {
+        s.classList.toggle(
+          "active",
+          Number(s.dataset.star) <= rating
+        );
+      });
+    });
+  });
+
+  // Submit feedback
+  document.getElementById("feedback-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (rating === 0) {
+      showToast(t("feedback_select_rating"));
+      return;
+    }
+
+    const message = document.getElementById("feedback-text").value.trim();
+    const category = document.getElementById("feedback-category").value;
+
+    if (!message) {
+      showToast(t("feedback_enter_text"));
+      return;
+    }
+
+    // Get logged-in user ID
+    const userId = localStorage.getItem("medidecode_user_id");
+
+    if (!userId) {
+      showToast(t("please_login_first"));
+      return;
+    }
+
+    const payload = {
+      rating: rating,
+      category: category,
+      message: message
+    };
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-ID": userId
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Unable to submit feedback");
+      }
+
+      showToast(t("thank_you_feedback"));
+
+      // Reset form
+      document.getElementById("feedback-form").reset();
+
+      rating = 0;
+
+      document.querySelectorAll(".star").forEach((s) => {
+        s.classList.remove("active");
+      });
+
+    } catch (error) {
+      console.error("Feedback error:", error);
+      showToast(error.message);
+    }
+  });
+</script>
+</body>
+</html>

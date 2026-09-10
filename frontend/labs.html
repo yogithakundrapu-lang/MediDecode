@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nearby Diagnostic Labs — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="hospitals"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="diagnostic_labs" data-subtitle-key="nearby_services"></div>
+
+    <div class="content">
+      <div class="tab-bar">
+        <a href="hospitals.html" class="tab-btn" data-i18n="nearby_hospitals">Hospitals</a>
+        <a href="medicalshops.html" class="tab-btn" data-i18n="medical_shops">Medical Shops</a>
+        <a href="labs.html" class="tab-btn active" data-i18n="diagnostic_labs">Diagnostic Labs</a>
+      </div>
+
+      <div class="grid-2-1-1">
+        <div class="card">
+          <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="labs_near_you">Labs Near You</h3>
+
+          <div class="hospital-card">
+            <div class="h-icon" style="background:var(--color-purple-light);color:var(--color-purple);">🧪</div>
+            <div><h4 data-i18n="lab_thyrocare_name">Thyrocare Lab</h4><p data-i18n="lab_thyrocare_desc">MG Road · Home sample collection available</p></div>
+            <div class="h-meta"><div class="h-rating">★ 4.5</div>1.5 km</div>
+          </div>
+          <div class="hospital-card">
+            <div class="h-icon" style="background:var(--color-purple-light);color:var(--color-purple);">🧪</div>
+            <div><h4 data-i18n="lab_lal_pathlabs_name">Dr. Lal PathLabs</h4><p data-i18n="lab_lal_pathlabs_desc">Governorpet · Open 7:00 AM – 8:00 PM</p></div>
+            <div class="h-meta"><div class="h-rating">★ 4.4</div>2.3 km</div>
+          </div>
+          <div class="hospital-card">
+            <div class="h-icon" style="background:var(--color-purple-light);color:var(--color-purple);">🧪</div>
+            <div><h4 data-i18n="lab_vijaya_name">Vijaya Diagnostic Centre</h4><p data-i18n="lab_vijaya_desc">Labbipet · Full body checkups</p></div>
+            <div class="h-meta"><div class="h-rating">★ 4.6</div>2.9 km</div>
+          </div>
+          <div class="hospital-card">
+            <div class="h-icon" style="background:var(--color-purple-light);color:var(--color-purple);">🧪</div>
+            <div><h4 data-i18n="lab_metropolis_name">Metropolis Healthcare</h4><p data-i18n="lab_metropolis_desc">Ring Road · Open 6:30 AM – 9:00 PM</p></div>
+            <div class="h-meta"><div class="h-rating">★ 4.3</div>3.1 km</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="map">Map</h3>
+          <div class="map-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.2-7-10.5A7 7 0 0 1 19 10.5C19 15.8 12 21 12 21Z"/><circle cx="12" cy="10.5" r="2.3"/></svg>
+            <span data-i18n="google_maps_placeholder">Google Maps integration placeholder</span>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:16px;" data-i18n="open_in_google_maps">Open in Google Maps</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+</body>
+</html>

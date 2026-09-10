@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="profile"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="profile_settings" data-subtitle-key="profile_subtitle"></div>
+
+    <div class="content">
+      <div class="grid-2-1-1">
+
+        <div class="card" style="text-align:center;">
+          <div class="avatar-lg" id="profile-avatar">Y</div>
+          <h3 style="margin:14px 0 2px;" id="profile-name">Yogitha Reddy</h3>
+          <p style="margin:0;color:var(--color-text-muted);font-size:13px;" id="profile-email">yogitha@example.com</p>
+          <button class="btn btn-outline btn-block" style="margin-top:18px;" data-i18n="change_photo">Change Photo</button>
+
+          <div style="text-align:left;margin-top:26px;">
+            <div class="settings-row"><span class="s-label" data-i18n="preferred_language">Preferred Language</span><span class="badge badge-green" id="profile-lang">English</span></div>
+            <div class="settings-row"><span class="s-label" data-i18n="member_since">Member Since</span><span id="profile-member-since" style="font-size:13.5px;color:var(--color-text-muted);">April 2025</span></div>
+            <div class="settings-row"><span class="s-label" data-i18n="account_type">Account Type</span><span id="profile-account-type" class="badge badge-amber">Premium</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 2;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <h3 style="margin:0;font-size:16px;" data-i18n="personal_medical_details">Personal & Medical Details</h3>
+            <button class="btn btn-primary" id="edit-toggle" data-i18n="edit_profile">Edit Profile</button>
+          </div>
+
+          <form id="profile-form">
+            <div class="field-row">
+                <div class="field no-icon"><label data-i18n="full_name_label">Full Name</label><input id="profile-fullname" type="text" value="Yogitha Reddy" disabled></div>
+                <div class="field no-icon"><label data-i18n="age_label">Age</label><input id="profile-age" type="number" value="24" disabled></div>
+              </div>
+            <div class="field-row">
+                <div class="field no-icon"><label data-i18n="gender_label">Gender</label>
+                  <select id="profile-gender" disabled><option value="" data-i18n="select_option">Select</option><option data-i18n="female">Female</option><option data-i18n="male">Male</option><option data-i18n="other">Other</option></select>
+                </div>
+                <div class="field no-icon"><label data-i18n="blood_group_label">Blood Group</label>
+                  <select id="profile-blood" disabled><option value="" data-i18n="select_option">Select</option><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>A-</option><option>B-</option><option>AB-</option><option>O-</option></select>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field no-icon"><label data-i18n="height_cm">Height (cm)</label><input id="profile-height" type="number" value="165" disabled></div>
+                <div class="field no-icon"><label data-i18n="weight_kg">Weight (kg)</label><input id="profile-weight" type="number" value="58" disabled></div>
+            </div>
+            <div class="field-row">
+                <div class="field no-icon"><label data-i18n="phone_number">Phone Number</label><input id="profile-phone" type="tel" value="+91 98765 43210" disabled></div>
+                <div class="field no-icon"><label data-i18n="email">Email</label><input id="profile-email-input" type="email" value="yogitha@example.com" disabled></div>
+            </div>
+            <div class="field no-icon"><label data-i18n="address_label">Address</label>
+                <textarea id="profile-address" disabled>12-3-45, MG Road, Vijayawada, Andhra Pradesh — 520010</textarea>
+            </div>
+              <div class="field no-icon">
+                <label data-i18n="emergency_contact">Emergency Contact</label>
+                <input id="profile-emergency" type="text" value="Ramesh Reddy — 98765 12340" disabled></div>
+            <div class="field no-icon">
+                <label data-i18n="medical_history">Medical History</label>
+                <textarea id="profile-medical-history" disabled></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="save-btn" style="display:none;" data-i18n="save_changes">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const userId = localStorage.getItem("medidecode_user_id");
+  console.log("PROFILE USER ID:", userId)
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const langLabels = {
+    en: "English",
+    te: "తెలుగు",
+    hi: "हिन्दी"
+  };
+
+  const editToggle = document.getElementById("edit-toggle");
+  const saveBtn = document.getElementById("save-btn");
+  const profileForm = document.getElementById("profile-form");
+
+  // --------------------------------------------------
+  // LOAD PROFILE FROM FLASK / MYSQL
+  // --------------------------------------------------
+
+  async function loadProfile() {
+
+    try {
+
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/profile/${userId}`
+      );
+
+      const data = await response.json();
+
+      console.log("PROFILE RESPONSE:", data);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to load profile"
+        );
+      }
+
+      const user = data.user;
+
+      if (!user) {
+        throw new Error("User information was not returned by the server.");
+      }
+
+      // --------------------------------------------------
+      // TOP PROFILE CARD
+      // --------------------------------------------------
+
+      const name = user.name || "User";
+
+      document.getElementById("profile-name").textContent = name;
+
+      document.getElementById("profile-avatar").textContent =
+        name.charAt(0).toUpperCase();
+
+      document.getElementById("profile-email").textContent =
+        user.email || "";
+
+      // --------------------------------------------------
+      // FORM FIELDS
+      // --------------------------------------------------
+
+      document.getElementById("profile-fullname").value =
+        user.name || "";
+
+      document.getElementById("profile-age").value =
+        user.age ?? "";
+
+      document.getElementById("profile-gender").value =
+        user.gender || "";
+
+      document.getElementById("profile-blood").value =
+        user.blood_group || "";
+
+      document.getElementById("profile-height").value =
+        user.height ?? "";
+
+      document.getElementById("profile-weight").value =
+        user.weight ?? "";
+
+      document.getElementById("profile-phone").value =
+        user.phone || "";
+
+      document.getElementById("profile-email-input").value =
+        user.email || "";
+
+      document.getElementById("profile-address").value =
+        user.address || "";
+
+      document.getElementById("profile-emergency").value =
+        user.emergency_contact || "";
+
+      document.getElementById("profile-medical-history").value =
+        user.medical_history || "";
+
+      // --------------------------------------------------
+      // LANGUAGE
+      // --------------------------------------------------
+
+      const language =
+        localStorage.getItem("medidecode_lang") || "en";
+
+      document.getElementById("profile-lang").textContent =
+        langLabels[language] || "English";
+
+      // --------------------------------------------------
+      // MEMBER SINCE
+      // --------------------------------------------------
+
+      const memberSinceEl =
+        document.getElementById("profile-member-since");
+
+      if (memberSinceEl && user.created_at) {
+
+        const date = new Date(user.created_at);
+
+        if (!Number.isNaN(date.getTime())) {
+
+          memberSinceEl.textContent =
+            date.toLocaleDateString(undefined, {
+              month: "long",
+              year: "numeric"
+            });
+
+        } else {
+
+          memberSinceEl.textContent =
+            user.created_at;
+        }
+      }
+
+      // --------------------------------------------------
+      // ACCOUNT TYPE
+      // --------------------------------------------------
+
+      const accountTypeEl =
+        document.getElementById("profile-account-type");
+
+      if (accountTypeEl) {
+        accountTypeEl.textContent = t("free_account");
+      }
+
+      console.log("Profile loaded successfully.");
+
+    } catch (error) {
+
+      console.error("PROFILE LOAD ERROR:", error);
+
+      alert(
+        "Unable to load profile.\n\n" +
+        error.message
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // EDIT PROFILE
+  // --------------------------------------------------
+
+  editToggle.addEventListener("click", () => {
+
+    const editing =
+      editToggle.dataset.editing === "true";
+
+    document
+      .querySelectorAll(
+        "#profile-form input, #profile-form select, #profile-form textarea"
+      )
+      .forEach((el) => {
+
+        el.disabled = editing;
+
+      });
+
+    editToggle.dataset.editing =
+      (!editing).toString();
+
+    editToggle.textContent =
+      editing ? "Edit Profile" : "Cancel";
+
+    saveBtn.style.display =
+      editing ? "none" : "inline-flex";
+  });
+
+  // --------------------------------------------------
+  // SAVE PROFILE TO MYSQL
+  // --------------------------------------------------
+
+  profileForm.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const profileData = {
+
+      name:
+        document.getElementById("profile-fullname").value,
+
+      age:
+        document.getElementById("profile-age").value || null,
+
+      gender:
+        document.getElementById("profile-gender").value,
+
+      blood_group:
+        document.getElementById("profile-blood").value,
+
+      height:
+        document.getElementById("profile-height").value || null,
+
+      weight:
+        document.getElementById("profile-weight").value || null,
+
+      phone:
+        document.getElementById("profile-phone").value,
+
+      email:
+        document.getElementById("profile-email-input").value,
+
+      address:
+        document.getElementById("profile-address").value,
+
+      emergency_contact:
+        document.getElementById("profile-emergency").value,
+
+      medical_history:
+        document.getElementById("profile-medical-history").value
+    };
+
+    console.log("SENDING PROFILE:", profileData);
+
+    try {
+
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/profile/${userId}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify(profileData)
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("UPDATE RESPONSE:", data);
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message || "Profile update failed"
+        );
+      }
+
+      // Update local name/email for the rest of the app
+      localStorage.setItem(
+        "medidecode_name",
+        profileData.name
+      );
+
+      localStorage.setItem(
+        "medidecode_email",
+        profileData.email
+      );
+
+      // Update visible profile header
+      document.getElementById("profile-name").textContent =
+        profileData.name;
+
+      document.getElementById("profile-avatar").textContent =
+        profileData.name.charAt(0).toUpperCase();
+
+      document.getElementById("profile-email").textContent =
+        profileData.email;
+
+      if (typeof showToast === "function") {
+        showToast("Profile updated successfully.");
+      } else {
+        alert("Profile updated successfully.");
+      }
+
+      // Exit edit mode
+      editToggle.click();
+
+    } catch (error) {
+
+      console.error("PROFILE UPDATE ERROR:", error);
+
+      alert(
+        "Unable to update profile.\n\n" +
+        error.message
+      );
+    }
+
+  });
+
+  // --------------------------------------------------
+  // LOAD PROFILE
+  // --------------------------------------------------
+
+  await loadProfile();
+
+});
+</script>
+</body>
+</html>

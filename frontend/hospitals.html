@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Nearby Hospitals — MediDecode</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- Sidebar -->
+    <div id="app-sidebar" data-active="hospitals"></div>
+
+    <div class="main-col">
+
+        <!-- Topbar -->
+        <div
+            id="app-topbar"
+            data-title-key="nearby_hospitals"
+            data-subtitle-key="nearby_services">
+        </div>
+
+
+        <div class="content">
+
+            <!-- Tabs -->
+            <div class="tab-bar">
+
+                <a
+                    href="hospitals.html"
+                    class="tab-btn active"
+                    data-i18n="nearby_hospitals">
+                    Hospitals
+                </a>
+
+                <a
+                    href="medicalshops.html"
+                    class="tab-btn"
+                    data-i18n="medical_shops">
+                    Medical Shops
+                </a>
+
+                <a
+                    href="labs.html"
+                    class="tab-btn"
+                    data-i18n="diagnostic_labs">
+                    Diagnostic Labs
+                </a>
+
+            </div>
+
+
+            <div class="grid-2-1-1">
+
+                <!-- Hospitals -->
+                <div class="card">
+
+                    <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="hospitals_near_you">
+                        Hospitals Near You
+                    </h3>
+
+
+                    <!-- Location Button -->
+                    <button
+                        id="locationBtn"
+                        class="btn btn-primary btn-block"
+                        style="margin-bottom:16px;"
+                        data-i18n="use_current_location">
+                        📍 Use My Current Location
+                    </button>
+
+
+                    <!-- Status -->
+                    <div
+                        id="locationStatus"
+                        style="
+                            margin-bottom:15px;
+                            color:#666;
+                            font-size:14px;
+                        "
+                        data-i18n="click_button_to_find_hospitals">
+                        Click the button above to find hospitals near you.
+                    </div>
+
+
+                    <!-- Search -->
+                    <input
+                        type="text"
+                        id="hospitalSearch"
+                        placeholder="Search nearby hospitals..."
+                        data-i18n-placeholder="search_nearby_hospitals"
+                        style="
+                            width:100%;
+                            padding:10px 12px;
+                            margin-bottom:15px;
+                            border:1px solid #ddd;
+                            border-radius:8px;
+                            font-family:Inter,sans-serif;
+                            box-sizing:border-box;
+                            display:none;
+                        ">
+
+
+                    <!-- Hospital List -->
+                    <div id="hospitalList"></div>
+
+                </div>
+
+
+                <!-- Map -->
+                <div class="card">
+
+                    <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="map">
+                        Map
+                    </h3>
+
+
+                    <div class="map-placeholder">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8">
+
+                            <path d="M12 21s-7-5.2-7-10.5A7 7 0 0 1 19 10.5C19 15.8 12 21 12 21Z"/>
+
+                            <circle
+                                cx="12"
+                                cy="10.5"
+                                r="2.3"/>
+
+                        </svg>
+
+                        <span data-i18n="select_hospital_map">
+                            Select a hospital to view it on Google Maps
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        id="openMapsBtn"
+                        class="btn btn-primary btn-block"
+                        style="margin-top:16px;"
+                        disabled
+                        data-i18n="open_in_google_maps">
+                        Open in Google Maps
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Existing MediDecode JavaScript -->
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+
+
+<script>
+
+/* =====================================================
+   CONFIGURATION
+===================================================== */
+
+const API_BASE =
+    window.location.protocol === "file:"
+        ? "http://127.0.0.1:5000"
+        : "";
+
+
+let hospitals = [];
+
+let selectedHospital = null;
+
+
+/* =====================================================
+   GET CURRENT LOCATION
+===================================================== */
+
+document
+    .getElementById("locationBtn")
+    .addEventListener("click", getCurrentLocation);
+
+
+function getCurrentLocation() {
+
+    const status =
+        document.getElementById("locationStatus");
+
+    const button =
+        document.getElementById("locationBtn");
+
+
+    if (!navigator.geolocation) {
+
+        status.textContent =
+            t("browser_location_not_supported");
+
+        return;
+    }
+
+
+    status.textContent =
+        t("getting_location");
+
+
+    button.disabled = true;
+
+    button.textContent =
+        t("getting_location");
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            const latitude =
+                position.coords.latitude;
+
+            const longitude =
+                position.coords.longitude;
+
+
+            status.textContent =
+                t("location_found_searching_hospitals");
+
+
+            findNearbyHospitals(
+                latitude,
+                longitude
+            );
+
+        },
+
+        function(error) {
+
+            console.error(
+                "Location error:",
+                error
+            );
+
+
+            button.disabled = false;
+
+            button.textContent =
+                t("use_current_location");
+
+
+            if (error.code === 1) {
+
+                status.textContent =
+                    t("location_permission_denied_chrome");
+
+            }
+
+            else if (error.code === 2) {
+
+                status.textContent =
+                    t("location_could_not_be_determined");
+
+            }
+
+            else if (error.code === 3) {
+
+                status.textContent =
+                    t("location_timeout_try_again");
+
+            }
+
+            else {
+
+                status.textContent =
+                    t("unable_get_location");
+
+            }
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+
+    );
+
+}
+
+
+/* =====================================================
+   FIND NEARBY HOSPITALS
+===================================================== */
+
+async function findNearbyHospitals(
+    latitude,
+    longitude
+) {
+
+    const status =
+        document.getElementById("locationStatus");
+
+    const button =
+        document.getElementById("locationBtn");
+
+
+    try {
+
+        const url =
+            API_BASE +
+            "/api/hospitals?latitude=" +
+            encodeURIComponent(latitude) +
+            "&longitude=" +
+            encodeURIComponent(longitude);
+
+
+        const response =
+            await fetch(url);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server error: " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!Array.isArray(data)) {
+
+            throw new Error(
+                data.error ||
+                "Invalid hospital data"
+            );
+
+        }
+
+
+        hospitals = data;
+
+
+        button.disabled = false;
+
+        button.textContent =
+            t("refresh_my_location");
+
+
+        if (hospitals.length === 0) {
+
+            status.textContent =
+                t("no_nearby_hospitals_found");
+
+            document.getElementById(
+                "hospitalList"
+            ).innerHTML = "";
+
+            return;
+
+        }
+
+
+        status.textContent =
+            t("nearby_hospitals_found_count", {
+                COUNT: hospitals.length
+            });
+
+
+        document.getElementById(
+            "hospitalSearch"
+        ).style.display = "block";
+
+
+        displayHospitals(hospitals);
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Hospital search error:",
+            error
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            t("try_again");
+
+
+        status.textContent =
+            t("unable_find_nearby_hospitals");
+
+    }
+
+}
+
+
+/* =====================================================
+   DISPLAY HOSPITALS
+===================================================== */
+
+function displayHospitals(data) {
+
+    const list =
+        document.getElementById("hospitalList");
+
+
+    list.innerHTML = "";
+
+
+    data.forEach(function(hospital) {
+
+
+        const card =
+            document.createElement("div");
+
+
+        card.className =
+            "hospital-card";
+
+
+        const name =
+            hospital.name ||
+            t("hospital_default_name");
+
+
+        const address =
+            hospital.address ||
+            t("address_not_available");
+
+
+        const specialty =
+            hospital.specialties ||
+            t("hospital_default_name");
+
+
+        card.innerHTML = `
+
+            <div
+                class="h-icon"
+                style="
+                    background:var(--color-primary-light);
+                    color:var(--color-primary);
+                ">
+                🏥
+            </div>
+
+
+            <div>
+
+                <h4>
+                    ${escapeHtml(name)}
+                </h4>
+
+                <p>
+                    ${escapeHtml(address)}
+                    ·
+                    ${escapeHtml(specialty)}
+                </p>
+
+            </div>
+
+
+            <div class="h-meta">
+
+                ${
+                    hospital.distance
+                        ? escapeHtml(
+                            hospital.distance
+                          )
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+
+        card.addEventListener(
+            "click",
+            function() {
+
+                selectedHospital =
+                    hospital;
+
+
+                document
+                    .querySelectorAll(
+                        ".hospital-card"
+                    )
+                    .forEach(function(item) {
+
+                        item.style.outline =
+                            "none";
+
+                    });
+
+
+                card.style.outline =
+                    "2px solid var(--color-primary)";
+
+
+                document.getElementById(
+                    "openMapsBtn"
+                ).disabled = false;
+
+            }
+        );
+
+
+        list.appendChild(card);
+
+    });
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+document
+    .getElementById("hospitalSearch")
+    .addEventListener(
+        "input",
+        function() {
+
+            const search =
+                this.value
+                    .toLowerCase()
+                    .trim();
+
+
+            if (!search) {
+
+                displayHospitals(
+                    hospitals
+                );
+
+                return;
+
+            }
+
+
+            const filtered =
+                hospitals.filter(
+                    function(hospital) {
+
+                        const name =
+                            String(
+                                hospital.name || ""
+                            ).toLowerCase();
+
+
+                        const address =
+                            String(
+                                hospital.address || ""
+                            ).toLowerCase();
+
+
+                        const specialty =
+                            String(
+                                hospital.specialties || ""
+                            ).toLowerCase();
+
+
+                        return (
+                            name.includes(search) ||
+                            address.includes(search) ||
+                            specialty.includes(search)
+                        );
+
+                    }
+                );
+
+
+            displayHospitals(
+                filtered
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   GOOGLE MAPS
+===================================================== */
+
+document
+    .getElementById("openMapsBtn")
+    .addEventListener(
+        "click",
+        function() {
+
+            if (!selectedHospital) {
+
+                return;
+
+            }
+
+
+            const name =
+                selectedHospital.name || "";
+
+
+            const address =
+                selectedHospital.address || "";
+
+
+            let query =
+                name + " " + address;
+
+
+            if (
+                selectedHospital.latitude &&
+                selectedHospital.longitude
+            ) {
+
+                query =
+                    selectedHospital.latitude +
+                    "," +
+                    selectedHospital.longitude;
+
+            }
+
+
+            const mapsUrl =
+                "https://www.google.com/maps/search/?api=1&query=" +
+                encodeURIComponent(query);
+
+
+            window.open(
+                mapsUrl,
+                "_blank"
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   SECURITY
+===================================================== */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>

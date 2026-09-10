@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-screen">
+  <div class="auth-card wide">
+    <div class="auth-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 4 5v6c0 5.2 3.4 9.9 8 11 4.6-1.1 8-5.8 8-11V5l-8-3Z"/><path d="M7.5 12.5h2.2l1.3-3 2 6 1.3-3h2.2"/>
+      </svg>
+    </div>
+    <h1 data-i18n="signup_title">Create your account</h1>
+    <p class="tag" data-i18n="signup_subtitle">A few details so we can personalise your health summary</p>
+
+    <form id="signup-form">
+      <div class="field-row">
+        <div class="field no-icon">
+          <label for="name" data-i18n="full_name">Full Name</label>
+          <input type="text" id="name" required data-i18n-placeholder="name_placeholder" placeholder="e.g. Name">
+        </div>
+        <div class="field no-icon">
+          <label for="age" data-i18n="age_label">Age</label>
+          <input type="number" id="age" min="1" max="120" required data-i18n-placeholder="age_placeholder" placeholder="e.g. 24">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field no-icon">
+          <label for="gender" data-i18n="gender_label">Gender</label>
+          <select id="gender" required>
+            <option value="" data-i18n="select_gender">Select gender</option>
+            <option data-i18n="female">Female</option>
+            <option data-i18n="male">Male</option>
+            <option data-i18n="other">Other</option>
+          </select>
+        </div>
+        <div class="field no-icon">
+          <label for="blood-group" data-i18n="blood_group_label">Blood Group</label>
+          <select id="blood-group" required>
+            <option value="" data-i18n="select_blood_group">Select blood group</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field no-icon">
+          <label for="height" data-i18n="height_cm">Height (cm)</label>
+          <input type="number" id="height" required data-i18n-placeholder="height_placeholder" placeholder="e.g. 165">
+        </div>
+        <div class="field no-icon">
+          <label for="weight" data-i18n="weight_kg">Weight (kg)</label>
+          <input type="number" id="weight" required data-i18n-placeholder="weight_placeholder" placeholder="e.g. 58">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field no-icon">
+          <label for="phone" data-i18n="phone_number">Phone Number</label>
+          <input type="tel" id="phone" required data-i18n-placeholder="phone_placeholder" placeholder="10-digit mobile number">
+        </div>
+        <div class="field no-icon">
+          <label for="email" data-i18n="email">Email</label>
+          <input type="email" id="email" required data-i18n-placeholder="email_placeholder" placeholder="you@example.com">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field no-icon">
+          <label for="password" data-i18n="password">Password</label>
+          <div style="position: relative;">
+            <input type="password" id="password" required data-i18n-placeholder="password_placeholder" placeholder="Enter your password" style="padding-right: 70px;">
+            <button type="button" class="toggle-password" data-target="password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: #4f46e5; font-weight: 600; cursor: pointer;">Show</button>
+          </div>
+        </div>
+        <div class="field no-icon">
+          <label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
+          <div style="position: relative;">
+            <input type="password" id="confirm-password" required data-i18n-placeholder="confirm_password_placeholder" placeholder="Re-enter password" style="padding-right: 70px;">
+            <button type="button" class="toggle-password" data-target="confirm-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: #4f46e5; font-weight: 600; cursor: pointer;">Show</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field no-icon">
+        <label for="address" data-i18n="address_label">Address</label>
+        <textarea id="address" required data-i18n-placeholder="address_placeholder" placeholder="House no, street, city, state, PIN code"></textarea>
+      </div>
+
+      <div class="field no-icon">
+        <label for="emergency-contact" data-i18n="emergency_contact">Emergency Contact Number</label>
+        <input type="tel" id="emergency-contact" required data-i18n-placeholder="emergency_placeholder" placeholder="10-digit mobile number">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;" data-i18n="signup">Register</button>
+    </form>
+
+    <p class="auth-footer-link"><span data-i18n="already_have_account">Already have an account?</span> <a href="login.html" data-i18n="login_here">Login here</a></p>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/script.js"></script>
+<script>
+  function validateSignupForm() {
+    const name = document.getElementById("name").value.trim();
+    const age = Number(document.getElementById("age").value);
+    const gender = document.getElementById("gender").value;
+    const bloodGroup = document.getElementById("blood-group").value;
+    const height = Number(document.getElementById("height").value);
+    const weight = Number(document.getElementById("weight").value);
+    const phoneInput = document.getElementById("phone");
+    const phone = phoneInput.value.trim();
+    const emailInput = document.getElementById("email");
+    const email = emailInput.value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const address = document.getElementById("address").value.trim();
+    const emergencyContactInput = document.getElementById("emergency-contact");
+    const emergencyContact = emergencyContactInput.value.trim();
+
+    if (!name || name.length < 2) {
+      alert("Please enter a valid full name.");
+      document.getElementById("name").focus();
+      return false;
+    }
+
+    if (!Number.isInteger(age) || age < 1 || age > 120) {
+      alert("Please enter a valid age between 1 and 120.");
+      document.getElementById("age").focus();
+      return false;
+    }
+
+    if (!gender) {
+      alert("Please select your gender.");
+      document.getElementById("gender").focus();
+      return false;
+    }
+
+    if (!bloodGroup) {
+      alert("Please select your blood group.");
+      document.getElementById("blood-group").focus();
+      return false;
+    }
+
+    if (!Number.isFinite(height) || height <= 0 || height > 300) {
+      alert("Height must be greater than 0 and less than or equal to 300 cm.");
+      document.getElementById("height").focus();
+      return false;
+    }
+
+    if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
+      alert("Weight must be greater than 0 and less than or equal to 500 kg.");
+      document.getElementById("weight").focus();
+      return false;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      phoneInput.setCustomValidity("Please enter a valid 10-digit phone number.");
+      phoneInput.reportValidity();
+      alert("Please enter a valid 10-digit phone number.");
+      phoneInput.focus();
+      return false;
+    }
+
+    phoneInput.setCustomValidity("");
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      emailInput.setCustomValidity("Please enter a valid email address.");
+      emailInput.reportValidity();
+      alert("Please enter a valid email address.");
+      emailInput.focus();
+      return false;
+    }
+
+    emailInput.setCustomValidity("");
+
+    if (password.length < 8) {
+      alert("Password must be at least 8 characters long.");
+      document.getElementById("password").focus();
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      alert(t("passwords_do_not_match"));
+      document.getElementById("confirm-password").focus();
+      return false;
+    }
+
+    if (address.length < 5) {
+      alert("Please enter a valid address.");
+      document.getElementById("address").focus();
+      return false;
+    }
+
+    const emergencyContactPattern = /^\d{10}$/;
+    if (!emergencyContactPattern.test(emergencyContact)) {
+      emergencyContactInput.setCustomValidity("Please enter a valid  10-digit emergency contact number.");
+      emergencyContactInput.reportValidity();
+      alert("Please enter a valid 10-digit emergancy contact number.");
+      emergencyContactInput.focus();
+      return false;
+    }
+
+    emergencyContactInput.setCustomValidity("");
+
+    return true;
+  }
+
+  const emailInput = document.getElementById("email");
+  const phoneInput = document.getElementById("phone");
+  const emergencyContactInput = document.getElementById("emergency-contact");
+
+  emailInput.addEventListener("input", () => {
+    emailInput.setCustomValidity("");
+  });
+
+  phoneInput.addEventListener("input", () => {
+    phoneInput.setCustomValidity("");
+  });
+
+  emergencyContactInput.addEventListener("input", () => {
+    emergencyContactInput.setCustomValidity("");
+  });
+
+  document.querySelectorAll(".toggle-password").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.target);
+      const isPassword = target.type === "password";
+
+      target.type = isPassword ? "text" : "password";
+      button.textContent = isPassword ? "Hide" : "Show";
+    });
+  });
+
+  document.getElementById("signup-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!validateSignupForm()) {
+      return;
+    }
+
+    const password = document.getElementById("password").value;
+
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      age: Number(document.getElementById("age").value),
+      gender: document.getElementById("gender").value,
+      blood_group: document.getElementById("blood-group").value,
+      height: Number(document.getElementById("height").value),
+      weight: Number(document.getElementById("weight").value),
+      phone: document.getElementById("phone").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      password: password,
+      address: document.getElementById("address").value.trim(),
+      emergency_contact: document.getElementById("emergency-contact").value.trim(),
+    };
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(t("account_created_success"));
+        window.location.href = "login.html";
+      } else {
+        alert(data.message || t("registration_failed"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(t("backend_unavailable"));
+    }
+  });
+</script>
+</body>
+</html>

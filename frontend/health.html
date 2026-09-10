@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Summary — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="health"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="health_summary" data-subtitle-key="dashboard_subtitle"></div>
+
+    <div class="content">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="summary" data-i18n="health_summary">Health Summary</button>
+        <button class="tab-btn" data-tab="advice" data-i18n="health_advice">Health Advice</button>
+      </div>
+
+      <div id="tab-summary">
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="card stat-card">
+            <div class="stat-icon blue">⚖️</div>
+            <div><h2>21.3</h2><p class="stat-label">BMI · Normal</p></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon green">❤️</div>
+            <div><h2>118/76</h2><p class="stat-label">Blood Pressure</p></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon amber">🩸</div>
+            <div><h2>112</h2><p class="stat-label">Sugar (Fasting, mg/dL)</p></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon purple">🧈</div>
+            <div><h2>165</h2><p class="stat-label">Cholesterol (mg/dL)</p></div>
+          </div>
+        </div>
+
+        <div class="grid-2-1-1">
+          <div class="card" style="text-align:center;">
+            <h3 style="margin:0 0 18px;font-size:16px;">Overall Health Score</h3>
+            <div class="progress-ring-wrap">
+              <svg width="118" height="118" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#eef1f6" stroke-width="12"/>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#1fa971" stroke-width="12"
+                  stroke-dasharray="326.7" stroke-dashoffset="49" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="ring-value">
+                <strong id="health-score">—</strong>
+                <span>out of 100</span>
+            </div>
+            </div>
+            <p id="health-score-message"
+                    style="margin:18px 0 0;font-size:13px;color:var(--color-text-muted);">
+                        Health score will be calculated from your latest report.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+  <h3 style="margin:0 0 12px;font-size:16px;" data-i18n="health_suggestions_title">
+    💡 Health Suggestions
+  </h3>
+
+  <ul
+    id="health-suggestions"
+    style="margin:0;padding-left:18px;font-size:13.5px;color:var(--color-text-muted);line-height:2;">
+    <li>Analyzing your latest report...</li>
+  </ul>
+</div>
+      </div>
+
+      <div id="tab-advice" style="display:none;">
+        <div class="grid-1-1-1">
+          <div class="card">
+  <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="hydration_title">
+    💧 Hydration
+  </h3>
+
+  <p
+    id="hydration-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;"
+  >
+    Loading hydration advice...
+  </p>
+</div>
+          <div class="card">
+  <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="exercise_title">
+    🏃 Exercise
+  </h3>
+
+  <p
+    id="exercise-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;"
+  >
+    Loading exercise advice...
+  </p>
+</div>
+          <div class="card">
+            <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="healthy_food_title">🥗 Healthy Food</h3>
+            <p
+    id="health-food-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;">
+    Loading food advice...
+</p>
+          <div class="card">
+  <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="sleep_title">
+    😴 Sleep
+  </h3>
+
+  <p
+    id="sleep-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;"
+  >
+    Loading sleep advice...
+  </p>
+</div>
+          <div class="card">
+  <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="doctor_title">
+    🩺 Doctor Advice
+  </h3>
+
+  <p
+    id="doctor-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;">
+    Loading doctor advice...
+  </p>
+</div>
+          <div class="card">
+  <h3 style="margin:0 0 14px;font-size:15px;" data-i18n="stay_consistent_title">
+    🔔 Stay Consistent
+  </h3>
+
+  <p
+    id="consistency-advice"
+    style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;"
+  >
+    Loading consistency advice...
+  </p>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+let healthReports = [];
+let healthReportDetails = [];
+
+const userId = localStorage.getItem("medidecode_user_id");
+const token = localStorage.getItem("medidecode_token");
+
+async function loadHealthData() {
+    try {
+        if (!userId) {
+            console.error("User ID not found.");
+            return;
+        }
+
+        // Get all reports belonging to the logged-in user
+        const reportsResponse = await fetch(
+            "http://127.0.0.1:5000/api/reports",
+            {
+                method: "GET",
+                headers: {
+                    "X-User-ID": userId,
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+        if (!reportsResponse.ok) {
+            throw new Error("Unable to load reports.");
+        }
+
+        const reportsData = await reportsResponse.json();
+
+        healthReports = reportsData.reports || [];
+
+        console.log("Health reports:", healthReports);
+
+        // Take the latest 6 reports
+        const latestReports = healthReports.slice(0, 6);
+
+        // Load complete information for each report
+        healthReportDetails = [];
+
+        for (const report of latestReports) {
+            const response = await fetch(
+                `http://127.0.0.1:5000/api/reports/${report.id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "X-User-ID": userId,
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                console.warn(
+                    "Could not load report:",
+                    report.id
+                );
+                continue;
+            }
+
+            const data = await response.json();
+
+            if (data.report) {
+                healthReportDetails.push(data.report);
+            }
+        }
+
+        console.log(
+            "Complete health report details:",
+            healthReportDetails
+        );
+
+        updateHealthSummary();
+        calculateHealthScore();
+        updateHealthSuggestions();
+        updateHealthAdvice();
+
+    } catch (error) {
+        console.error(
+            "HEALTH DATA ERROR:",
+            error
+        );
+    }
+}
+
+function updateHealthSuggestions() {
+
+    const suggestionsElement =
+        document.getElementById("health-suggestions");
+
+    if (!suggestionsElement) {
+        return;
+    }
+
+    if (!healthReportDetails.length) {
+        suggestionsElement.innerHTML =
+            `<li>${t("health_suggestion_no_report_data")}</li>`;
+
+        return;
+    }
+
+    const latestReport =
+        healthReportDetails[0];
+
+    const parameters =
+        latestReport.parameters || [];
+
+    const suggestions = [];
+
+    parameters.forEach(parameter => {
+
+        const name =
+            String(parameter.name || "").toLowerCase();
+
+        const risk =
+            String(parameter.risk || "").toLowerCase();
+
+        if (name.includes("hemoglobin")) {
+
+            if (risk === "low") {
+                suggestions.push(
+                    t("health_suggestion_hemoglobin_low")
+                );
+            }
+
+            if (risk === "high") {
+                suggestions.push(
+                    t("health_suggestion_hemoglobin_high")
+                );
+            }
+        }
+
+        if (
+            name.includes("fasting blood sugar") ||
+            name.includes("blood sugar")
+        ) {
+
+            if (risk.includes("high")) {
+                suggestions.push(
+                    t("health_suggestion_blood_sugar_high")
+                );
+            }
+
+            if (risk === "normal") {
+                suggestions.push(
+                    t("health_suggestion_blood_sugar_normal")
+                );
+            }
+        }
+
+        if (name.includes("cholesterol")) {
+
+            if (
+                risk.includes("high") ||
+                risk.includes("slightly high")
+            ) {
+                suggestions.push(
+                    t("health_suggestion_cholesterol_high")
+                );
+            }
+
+            if (risk === "normal") {
+                suggestions.push(
+                    t("health_suggestion_cholesterol_normal")
+                );
+            }
+        }
+
+        if (name.includes("triglyceride")) {
+
+            if (risk.includes("high")) {
+                suggestions.push(
+                    t("health_suggestion_triglycerides_high")
+                );
+            }
+        }
+
+        if (name === "hdl") {
+
+            if (risk === "low") {
+                suggestions.push(
+                    t("health_suggestion_hdl_low")
+                );
+            }
+        }
+
+        if (name === "ldl") {
+
+            if (
+                risk.includes("high") ||
+                risk.includes("slightly high")
+            ) {
+                suggestions.push(
+                    t("health_suggestion_ldl_high")
+                );
+            }
+        }
+
+        if (name.includes("creatinine")) {
+
+            if (
+                risk === "high" ||
+                risk === "low"
+            ) {
+                suggestions.push(
+                    t("health_suggestion_creatinine_abnormal")
+                );
+            }
+        }
+    });
+
+    if (suggestions.length === 0) {
+
+        suggestions.push(
+            t("health_suggestion_no_major_abnormalities")
+        );
+
+        suggestions.push(
+            t("health_suggestion_continue_healthy_lifestyle")
+        );
+    }
+
+    suggestionsElement.innerHTML =
+        suggestions
+            .slice(0, 5)
+            .map(
+                suggestion =>
+                    `<li>${suggestion}</li>`
+            )
+            .join("");
+}
+function updateHealthAdvice() {
+
+    if (!healthReportDetails.length) {
+        return;
+    }
+
+    const latestReport = healthReportDetails[0];
+
+    const parameters =
+        latestReport.parameters || [];
+
+    const findParameterByName = (names) => {
+
+        return parameters.find(parameter => {
+
+            const parameterName =
+                String(parameter.name || "").toLowerCase();
+
+            return names.some(name =>
+                parameterName === name.toLowerCase()
+            );
+        });
+    };
+
+
+    /* ================================
+       HEALTHY FOOD
+       ================================ */
+
+    const foodAdvice =
+        document.getElementById("health-food-advice");
+
+    if (foodAdvice) {
+
+        const hemoglobin =
+            findParameterByName(["Hemoglobin"]);
+
+        const cholesterol =
+            findParameterByName(["Cholesterol"]);
+
+        const ldl =
+            findParameterByName(["LDL"]);
+
+        const foodRecommendations = [];
+
+        if (
+            hemoglobin &&
+            String(hemoglobin.risk).toLowerCase() === "low"
+        ) {
+            foodRecommendations.push(
+                t("health_food_iron_rich")
+            );
+        }
+
+        if (
+            cholesterol &&
+            String(cholesterol.risk)
+                .toLowerCase()
+                .includes("high")
+        ) {
+            foodRecommendations.push(
+                t("health_food_cholesterol_high")
+            );
+        }
+
+        if (
+            ldl &&
+            String(ldl.risk)
+                .toLowerCase()
+                .includes("high")
+        ) {
+            foodRecommendations.push(
+                t("health_food_ldl_high")
+            );
+        }
+
+        if (foodRecommendations.length === 0) {
+
+            foodRecommendations.push(
+                t("balanced_diet_lifestyle_advice")
+            );
+        }
+
+        foodAdvice.textContent =
+            foodRecommendations.join(" ");
+    }
+
+
+    /* ================================
+       EXERCISE
+       ================================ */
+
+    const exerciseAdvice =
+        document.getElementById("exercise-advice");
+
+    if (exerciseAdvice) {
+
+        const cholesterol =
+            findParameterByName(["Cholesterol"]);
+
+        const ldl =
+            findParameterByName(["LDL"]);
+
+        if (
+            (cholesterol &&
+                String(cholesterol.risk)
+                    .toLowerCase()
+                    .includes("high")) ||
+            (ldl &&
+                String(ldl.risk)
+                    .toLowerCase()
+                    .includes("high"))
+        ) {
+
+            exerciseAdvice.textContent =
+                t("exercise_advice");
+
+        } else {
+
+            exerciseAdvice.textContent =
+                t("regular_exercise");
+        }
+    }
+
+
+    /* ================================
+       HYDRATION
+       ================================ */
+
+    const hydrationAdvice =
+        document.getElementById("hydration-advice");
+
+    if (hydrationAdvice) {
+
+        hydrationAdvice.textContent =
+            t("hydration_advice");
+    }
+
+
+    /* ================================
+       SLEEP
+       ================================ */
+
+    const sleepAdvice =
+        document.getElementById("sleep-advice");
+
+    if (sleepAdvice) {
+
+        sleepAdvice.textContent =
+            t("sleep_advice");
+    }
+
+
+    /* ================================
+       DOCTOR ADVICE
+       ================================ */
+
+    const doctorAdvice =
+        document.getElementById("doctor-advice");
+
+    if (doctorAdvice) {
+
+        const abnormalParameters =
+            parameters.filter(parameter => {
+
+                const risk =
+                    String(parameter.risk || "")
+                        .toLowerCase();
+
+                return (
+                    risk === "low" ||
+                    risk === "high" ||
+                    risk.includes("slightly")
+                );
+            });
+
+        if (abnormalParameters.length > 0) {
+
+            doctorAdvice.textContent =
+                t("doctor_advice");
+
+        } else {
+
+            doctorAdvice.textContent =
+                t("consult_doctor");
+        }
+    }
+
+
+    /* ================================
+       STAY CONSISTENT
+       ================================ */
+
+    const consistencyAdvice =
+        document.getElementById(
+            "consistency-advice"
+        );
+
+    if (consistencyAdvice) {
+
+        consistencyAdvice.textContent =
+            t("consistency_advice");
+    }
+}
+/* ============================================================
+   FIND PARAMETER
+   ============================================================ */
+
+function findParameter(report, names) {
+
+    if (!report || !report.parameters) {
+        return null;
+    }
+
+    const parameters = report.parameters;
+
+    return parameters.find(parameter => {
+
+        const parameterName =
+            String(parameter.name || "").toLowerCase();
+
+        return names.some(name =>
+            parameterName === name.toLowerCase()
+        );
+    }) || null;
+}
+
+
+/* ============================================================
+   UPDATE SUMMARY CARDS
+   ============================================================ */
+
+function updateHealthSummary() {
+
+    if (!healthReportDetails.length) {
+        console.log("No detailed reports available.");
+        return;
+    }
+
+    const latestReport = healthReportDetails[0];
+
+    console.log("Updating Health Summary:", latestReport);
+
+
+    /* =========================================================
+       1. BLOOD PRESSURE
+       ========================================================= */
+
+    const bpCard = document.querySelector(
+        ".stat-card:nth-child(2) h2"
+    );
+
+    const bpLabel = document.querySelector(
+        ".stat-card:nth-child(2) .stat-label"
+    );
+
+    const vitalSigns =
+        latestReport.medical_information?.vital_signs || {};
+
+    const bloodPressure =
+        vitalSigns.blood_pressure;
+
+    if (bloodPressure) {
+
+        bpCard.textContent =
+            `${bloodPressure.systolic}/${bloodPressure.diastolic}`;
+
+        bpLabel.textContent =
+            `Blood Pressure (${bloodPressure.unit || "mmHg"})`;
+
+    } else {
+
+        bpCard.textContent = "—";
+        bpLabel.textContent = "Blood Pressure · Not available";
+    }
+
+
+    /* =========================================================
+       2. FASTING BLOOD SUGAR
+       ========================================================= */
+
+    const sugarCard = document.querySelector(
+        ".stat-card:nth-child(3) h2"
+    );
+
+    const sugarLabel = document.querySelector(
+        ".stat-card:nth-child(3) .stat-label"
+    );
+
+    const sugar = findParameter(
+        latestReport,
+        ["Fasting Blood Sugar"]
+    );
+
+    if (sugar) {
+
+        sugarCard.textContent =
+            sugar.detected;
+
+        sugarLabel.textContent =
+            `Sugar (Fasting) · ${sugar.risk}`;
+
+    } else {
+
+        sugarCard.textContent = "—";
+        sugarLabel.textContent =
+            "Sugar (Fasting) · Not available";
+    }
+
+
+    /* =========================================================
+       3. CHOLESTEROL
+       ========================================================= */
+
+    const cholesterolCard = document.querySelector(
+        ".stat-card:nth-child(4) h2"
+    );
+
+    const cholesterolLabel = document.querySelector(
+        ".stat-card:nth-child(4) .stat-label"
+    );
+
+    const cholesterol = findParameter(
+        latestReport,
+        ["Cholesterol"]
+    );
+
+    if (cholesterol) {
+
+		const cholesterolValue = String(
+			cholesterol.detected || ""
+		).match(/[-+]?\d+(?:\.\d+)?/);
+
+		cholesterolCard.textContent =
+			cholesterolValue
+				? cholesterolValue[0]
+				: "—";       
+
+    } else {
+
+        cholesterolCard.textContent = "—";
+        cholesterolLabel.textContent =
+            "Cholesterol";
+    }
+
+
+    /* =========================================================
+       4. BMI
+       ========================================================= */
+
+    calculateBMI();
+}
+
+
+/* ============================================================
+   CALCULATE BMI FROM PROFILE
+   ============================================================ */
+
+async function calculateBMI() {
+
+    const bmiCard =
+        document.querySelector(
+            ".stat-card:nth-child(1) h2"
+        );
+
+    const bmiLabel =
+        document.querySelector(
+            ".stat-card:nth-child(1) .stat-label"
+        );
+
+    try {
+
+        const response = await fetch(
+            `http://127.0.0.1:5000/api/profile/${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization":
+                        "Bearer " + token
+                }
+            }
+        );
+
+        if (!response.ok) {
+            return;
+        }
+
+        const data =
+            await response.json();
+
+        const user =
+            data.user;
+
+        if (
+            !user ||
+            !user.height ||
+            !user.weight
+        ) {
+            bmiCard.textContent = "—";
+            bmiLabel.textContent = "BMI";
+            return;
+        }
+
+        const heightCm =
+            parseFloat(user.height);
+
+        const weightKg =
+            parseFloat(user.weight);
+
+        if (
+            isNaN(heightCm) ||
+            isNaN(weightKg) ||
+            heightCm <= 0 ||
+            weightKg <= 0
+        ) {
+            bmiCard.textContent = "—";
+            bmiLabel.textContent = "BMI";
+            return;
+        }
+
+        const heightMeters =
+            heightCm / 100;
+
+        const bmi =
+            weightKg /
+            (heightMeters * heightMeters);
+
+        let status = "Normal";
+
+        if (bmi < 18.5) {
+            status = "Underweight";
+        } else if (bmi >= 25 && bmi < 30) {
+            status = "Overweight";
+        } else if (bmi >= 30) {
+            status = "Obesity";
+        }
+
+        bmiCard.textContent =
+            bmi.toFixed(1);
+
+        bmiLabel.textContent =
+            "BMI · " + status;
+
+    } catch (error) {
+
+        console.error(
+            "BMI ERROR:",
+            error
+        );
+    }
+}
+
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+
+document
+    .querySelectorAll(".tab-btn")
+    .forEach((btn) => {
+
+        btn.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .querySelectorAll(".tab-btn")
+                    .forEach(
+                        b =>
+                            b.classList
+                                .remove("active")
+                    );
+
+                btn.classList.add("active");
+
+                document
+                    .getElementById(
+                        "tab-summary"
+                    )
+                    .style.display =
+                    btn.dataset.tab ===
+                    "summary"
+                        ? "block"
+                        : "none";
+
+                document
+                    .getElementById(
+                        "tab-advice"
+                    )
+                    .style.display =
+                    btn.dataset.tab ===
+                    "advice"
+                        ? "block"
+                        : "none";
+            }
+        );
+
+    });
+
+
+/* ============================================================
+   START
+   ============================================================ */
+function calculateHealthScore() {
+
+    if (!healthReportDetails.length) {
+        return;
+    }
+
+    const latestReport =
+        healthReportDetails[0];
+
+    const parameters =
+        latestReport.parameters || [];
+
+    let score = 100;
+
+    let abnormalCount = 0;
+
+    parameters.forEach(parameter => {
+
+        const risk =
+            String(parameter.risk || "")
+                .toLowerCase();
+
+        if (risk === "high") {
+            score -= 10;
+            abnormalCount++;
+        }
+
+        else if (risk === "low") {
+            score -= 10;
+            abnormalCount++;
+        }
+
+        else if (risk.includes("slightly high")) {
+            score -= 5;
+            abnormalCount++;
+        }
+
+        else if (risk.includes("slightly low")) {
+            score -= 5;
+            abnormalCount++;
+        }
+    });
+
+    score =
+        Math.max(0, Math.min(100, score));
+
+    const scoreElement =
+        document.getElementById(
+            "health-score"
+        );
+
+    const messageElement =
+        document.getElementById(
+            "health-score-message"
+        );
+
+    if (scoreElement) {
+        scoreElement.textContent =
+            score;
+    }
+
+    if (messageElement) {
+
+        if (score >= 80) {
+
+            messageElement.textContent =
+                t("health_score_good", { COUNT: abnormalCount });
+
+        } else if (score >= 60) {
+
+            messageElement.textContent =
+                t("health_score_attention", { COUNT: abnormalCount });
+
+        } else {
+
+            messageElement.textContent =
+                t("health_score_severe_attention");
+        }
+    }
+}
+loadHealthData();
+
+document.addEventListener("languageChanged", () => {
+    if (healthReportDetails.length) {
+        calculateHealthScore();
+        updateHealthSuggestions();
+        updateHealthAdvice();
+    }
+});
+
+</script>
+</body>
+</html>

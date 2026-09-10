@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose Language — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-screen">
+  <div class="lang-card">
+    <div class="lang-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+      </svg>
+    </div>
+    <h1 data-i18n="choose_language">Choose your language</h1>
+    <p class="tag" data-i18n="change_anytime_settings">You can change this anytime from Settings</p>
+
+    <div id="lang-list">
+      <button class="lang-option" data-lang="en">
+        <span><span class="native">English</span><span class="english" data-i18n="default_language">Default</span></span>
+        <span class="check"></span>
+      </button>
+      <button class="lang-option" data-lang="te">
+        <span><span class="native">తెలుగు</span><span class="english">Telugu</span></span>
+        <span class="check"></span>
+      </button>
+      <button class="lang-option" data-lang="hi">
+        <span><span class="native">हिन्दी</span><span class="english">Hindi</span></span>
+        <span class="check"></span>
+      </button>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="continue-btn" style="margin-top:8px;" data-i18n="continue">Continue</button>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script>
+  const options = document.querySelectorAll(".lang-option");
+  let selected = localStorage.getItem("medidecode_lang") || "en";
+
+  function paint() {
+    options.forEach((opt) => opt.classList.toggle("selected", opt.dataset.lang === selected));
+  }
+
+  function renderSelectedLanguage() {
+    selected = getCurrentLanguage();
+    paint();
+  }
+
+  paint();
+
+  options.forEach((opt) => {
+    opt.addEventListener("click", () => {
+      selected = opt.dataset.lang;
+      paint();
+    });
+  });
+
+  document.getElementById("continue-btn").addEventListener("click", () => {
+    setLanguage(selected);
+    window.location.href = "login.html";
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderSelectedLanguage();
+    applyTranslations();
+  });
+</script>
+</body>
+</html>

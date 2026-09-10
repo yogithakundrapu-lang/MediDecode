@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 4 5v6c0 5.2 3.4 9.9 8 11 4.6-1.1 8-5.8 8-11V5l-8-3Z"/><path d="M7.5 12.5h2.2l1.3-3 2 6 1.3-3h2.2"/>
+      </svg>
+    </div>
+    <h1 data-i18n="login_title">Welcome back</h1>
+    <p class="tag" data-i18n="login_subtitle">Log in to continue to MediDecode</p>
+
+    <form id="login-form">
+      <div class="field">
+        <label for="email" data-i18n="email">Email</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
+          <input type="email" id="email" required data-i18n-placeholder="email_placeholder" placeholder="you@example.com">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password" data-i18n="password">Password</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input type="password" id="password" required data-i18n-placeholder="password_placeholder" placeholder="Enter your password">
+          <button type="button" class="toggle-eye" id="toggle-password">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-aux">
+        <label><input type="checkbox" id="remember"> <span data-i18n="remember_me">Remember Me</span></label>
+        <a href="#" id="forgot-link" data-i18n="forgot_password">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" data-i18n="login_button">Login</button>
+    </form>
+
+    <p class="auth-footer-link"><span data-i18n="no_account">Don't have an account?</span> <a href="signup.html" data-i18n="create_account">Create New Account</a></p>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/script.js"></script>
+<script>
+  document.getElementById("toggle-password").addEventListener("click", () => {
+    const input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+  });
+
+  document.getElementById("forgot-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    alert(t("password_reset_link"));
+  });
+
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      console.log("LOGIN USER DATA:", data.user);
+      if (res.ok) {
+  localStorage.setItem("medidecode_token", data.token);
+  localStorage.setItem("medidecode_name", data.user.name);
+  localStorage.setItem("medidecode_email", data.user.email);
+  localStorage.setItem("medidecode_user_id", data.user.id);
+
+  // Keep the language selected on the language page
+  const selectedLanguage = localStorage.getItem("medidecode_lang") || "en";
+  setLanguage(selectedLanguage);
+
+  // Save the selected language for this logged-in user
+  try {
+    await fetch("http://127.0.0.1:5000/api/users/me/settings", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-ID": data.user.id
+      },
+      body: JSON.stringify({
+        preferred_language: selectedLanguage
+      })
+    });
+  } catch (languageError) {
+    console.error("Could not save language preference:", languageError);
+  }
+
+  window.location.href = "dashboard.html";
+}
+      else {
+        alert(data.message || t("invalid_email_or_password"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(t("backend_unavailable"));
+    }
+  });
+</script>
+</body>
+</html>

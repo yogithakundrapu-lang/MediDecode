@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<!-- Leaflet Map -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="dashboard"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title-key="welcome_name" data-subtitle-key="dashboard_subtitle"></div>
+    <div class="content">
+
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="card stat-card">
+          <div class="stat-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6M9 8h2"/></svg>
+          </div>
+          <div>
+            <h2 id="stat-count">12</h2>
+            <p class="stat-label" data-i18n="reports_uploaded">Reports Uploaded</p>
+            <a href="history.html" data-i18n="view_all_reports">View all reports →</a>
+          </div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+          </div>
+          <div>
+            <p class="stat-label" style="margin:0;" data-i18n="latest_report">Latest Report</p>
+            <h2 style="font-size:16px;">CBC Blood Test</h2>
+            <p class="stat-label" style="margin:2px 0 0;" data-i18n="latest_report_date">01 May 2025</p>
+          </div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-icon blue">
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8">
+            <path d="M3 12h4l2 6 4-14 2 8h6"/>
+            </svg>
+          </div>
+
+          <div>
+            <p class="stat-label" style="margin:0;" data-i18n="health_status">
+              Health Status
+           </p>
+
+            <h2 id="healthStatusValue"style="font-size:16px;color:var(--color-green);">
+      Checking...
+    </h2>
+
+    <a href="health.html" data-i18n="see_summary">
+      See summary →
+    </a>
+  </div>
+</div>
+
+        <div class="card stat-card">
+          <div class="stat-icon amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="m12 3 2.6 5.6L21 9.3l-4.5 4.2 1.1 6.2L12 16.8l-5.6 2.9 1.1-6.2L3 9.3l6.4-.7Z"/></svg>
+          </div>
+          <div>
+            <p class="stat-label" style="margin:0;" data-i18n="member_since">Member Since</p>
+            <h2 id="memberSinceValue" style="font-size:16px;">Loading...</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2-1-1" style="margin-bottom:20px;">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div>
+              <h3 style="margin:0;font-size:16px;" data-i18n="upload_medical_report">Upload Medical Report</h3>
+              <p style="margin:2px 0 0;font-size:13px;color:var(--color-text-muted);" data-i18n="upload_report_description">Upload PDF, image or capture using camera</p>
+            </div>
+          </div>
+
+          <div class="upload-zone" id="drop-zone">
+            <div class="upload-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15V4M12 4 8 8M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            </div>
+            <h3 data-i18n="drag_drop">Drag &amp; drop your file here</h3>
+            <p data-i18n="pdf_image_limit">PDF, JPG, PNG up to 10MB</p>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-outline" id="choose-file-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M9 6l1-2h4l1 2"/></svg>
+              <span data-i18n="choose_file">Choose File</span>
+            </button>
+            <button class="btn btn-soft-purple" id="capture-photo-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M9 6l1-2h4l1 2"/></svg>
+              <span data-i18n="capture_photo">Capture Photo</span>
+            </button>
+            <button class="btn btn-primary" id="upload-btn" style="margin-left:auto;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15V4M12 4 8 8M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+              <span data-i18n="upload">Upload</span>
+            </button>
+          </div>
+          <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" hidden>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h3 style="margin:0;font-size:16px;" data-i18n="simplified_report_latest">Simplified Report (Latest)</h3>
+            <a href="reports.html" style="font-size:13px;font-weight:600;color:var(--color-primary);" data-i18n="view_full_report">View Full Report →</a>
+          </div>
+
+          <div id="latestParametersContainer">
+            <div style="color:var(--color-text-muted);font-size:13.5px;">
+              Loading parameters...
+           </div>
+          </div>
+
+          <p style="margin:14px 0 0;font-size:12.5px;color:var(--color-text-muted);background:var(--color-bg);padding:10px 12px;border-radius:10px;" data-i18n="abnormal_values">
+            Abnormal values are highlighted. Please consult a doctor for advice.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-1-1-1">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h3 style="margin:0;font-size:16px;" data-i18n="recent_reports">Recent Reports</h3>
+            <a href="history.html" style="font-size:13px;font-weight:600;color:var(--color-primary);" data-i18n="view_all">View All →</a>
+          </div>
+          <table class="table">
+            <thead><tr><th data-i18n="report_name">Report Name</th><th data-i18n="date">Date</th><th data-i18n="status">Status</th><th></th></tr></thead>
+            <tbody id="recent-reports-body">
+              <tr><td>CBC Blood Test</td><td>01 May 2025</td><td><span class="badge badge-green" data-i18n="processed">Processed</span></td>
+                <td class="row-actions"><a href="reports.html">👁</a></td></tr>
+              <tr><td>Lipid Profile</td><td>20 Apr 2025</td><td><span class="badge badge-green" data-i18n="processed">Processed</span></td>
+                <td class="row-actions"><a href="reports.html">👁</a></td></tr>
+              <tr><td>X-Ray Chest</td><td>10 Apr 2025</td><td><span class="badge badge-green" data-i18n="processed">Processed</span></td>
+                <td class="row-actions"><a href="reports.html">👁</a></td></tr>
+              <tr><td>Thyroid Test</td><td>02 Apr 2025</td><td><span class="badge badge-green" data-i18n="processed">Processed</span></td>
+                <td class="row-actions"><a href="reports.html">👁</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+  <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="health_advice_title">
+    Health Advice
+  </h3>
+
+  <div
+    id="healthAdviceList"
+    style="display:flex;flex-direction:column;gap:12px;font-size:13.5px;"
+  >
+    <div style="display:flex;gap:10px;">
+      💧
+      <span data-i18n="loading_health_advice">Loading health advice...</span>
+    </div>
+  </div>
+
+  <p
+    style="margin:16px 0 0;font-size:12.5px;background:var(--color-amber-light);color:#8a5a10;padding:10px 12px;border-radius:10px;"
+    data-i18n="consult_doctor"
+  >
+    If you have any symptoms, please consult a doctor.
+  </p>
+</div>
+
+        
+        <div class="card" style="grid-column: span 1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div>
+      <h3 style="margin:0;font-size:16px;">
+        🗺️ <span data-i18n="nearby_healthcare">Nearby Healthcare</span>
+      </h3>
+      <p style="margin:3px 0 0;font-size:12.5px;color:var(--color-text-muted);" data-i18n="find_nearby_healthcare">
+        Find hospitals, medical shops and labs near you
+      </p>
+    </div>
+
+    <button
+      id="locate-me-btn"
+      class="btn btn-outline"
+      style="padding:7px 10px;font-size:12px;">
+      <span data-i18n="my_location">📍 My Location</span>
+    </button>
+  </div>
+
+  <!-- Map -->
+  <div
+    id="dashboard-map"
+    style="
+      width:100%;
+      height:300px;
+      border-radius:12px;
+      overflow:hidden;
+      margin-bottom:12px;
+    "
+  ></div>
+
+  <!-- Map legend -->
+  <div style="
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    font-size:12.5px;
+    color:var(--color-text-muted);
+  ">
+    <span data-i18n="nearby_hospitals">🏥 Hospitals</span>
+    <span data-i18n="medical_shops">💊 Medical Shops</span>
+    <span data-i18n="diagnostic_labs">🧪 Diagnostic Labs</span>
+  </div>
+</div>
+      </div>
+
+      <div class="footer-band">
+        <div class="fb-item">
+          <div>
+            <h4 data-i18n="need_help">Need Help?</h4>
+            <p data-i18n="check_faq">Check FAQs or contact our support team.</p>
+          </div>
+          <a class="btn btn-outline" href="support.html" data-i18n="get_help">Get Help</a>
+        </div>
+        <div class="fb-item">
+          <div>
+            <h4 data-i18n="feedback_title">Feedback</h4>
+            <p data-i18n="improve_experience">Help us improve your experience.</p>
+          </div>
+          <a class="btn btn-outline" href="feedback.html" data-i18n="give_feedback">Give Feedback</a>
+        </div>
+        <div class="fb-item">
+          <div>
+            <h4 data-i18n="stay_updated">Stay Updated</h4>
+            <p data-i18n="enable_notifications">Enable notifications for report updates.</p>
+          </div>
+          <a class="btn btn-outline" href="settings.html" data-i18n="enable">Enable</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  // ============================================
+  // DASHBOARD UPLOAD BUTTONS
+  // ============================================
+
+  document
+    .getElementById("choose-file-btn")
+    ?.addEventListener("click", () => {
+
+      document
+        .getElementById("file-input")
+        ?.click();
+
+    });
+
+
+  document
+    .getElementById("drop-zone")
+    ?.addEventListener("click", () => {
+
+      document
+        .getElementById("file-input")
+        ?.click();
+
+    });
+
+
+  document
+    .getElementById("capture-photo-btn")
+    ?.addEventListener("click", () => {
+
+      window.location.href =
+        "upload.html?mode=camera";
+
+    });
+
+
+  document
+    .getElementById("file-input")
+    ?.addEventListener("change", (e) => {
+
+      if (e.target.files.length) {
+
+        sessionStorage.setItem(
+          "medidecode_pending_filename",
+          e.target.files[0].name
+        );
+
+        window.location.href =
+          "upload.html";
+      }
+
+    });
+
+
+  document
+    .getElementById("upload-btn")
+    ?.addEventListener("click", () => {
+
+      window.location.href =
+        "upload.html";
+
+    });
+
+  // ============================================
+  // GET LOGGED-IN USER
+  // ============================================
+  const userId = localStorage.getItem("medidecode_user_id");
+  const token = localStorage.getItem("medidecode_token");
+
+  if (!userId) {
+    console.error("User ID not found in localStorage");
+    return;
+  }
+  // ============================================
+  // LOAD MEMBER SINCE
+  // ============================================
+  try {
+    const profileResponse = await fetch(
+      `http://127.0.0.1:5000/api/profile/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + (token || ""),
+          "X-User-ID": userId
+        }
+      }
+    );
+
+    const profileData = await profileResponse.json();
+
+    console.log("PROFILE RESPONSE:", profileData);
+
+    if (profileResponse.ok) {
+      const memberSinceElement =
+        document.getElementById("memberSinceValue");
+
+      if (memberSinceElement) {
+
+        const dateValue =
+           profileData.user?.created_at;
+
+        if (dateValue) {
+          const date = new Date(dateValue);
+
+          memberSinceElement.textContent =
+            date.toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric"
+            });
+        } else {
+          memberSinceElement.textContent = "—";
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error(
+      "MEMBER SINCE ERROR:",
+      error
+    );
+
+    const memberSinceElement =
+      document.getElementById("memberSinceValue");
+
+    if (memberSinceElement) {
+      memberSinceElement.textContent = "—";
+    }
+  }
+  // ============================================
+  // SET USER NAME IN TOPBAR
+  // ============================================
+  const name = localStorage.getItem("medidecode_name") || "Guest";
+  const topbar = document.getElementById("app-topbar");
+
+  if (topbar && topbar.dataset.titleKey) {
+    topbar.dataset.title = t(
+      topbar.dataset.titleKey,
+      { NAME: name }
+    );
+  }
+
+  // ============================================
+  // LOAD DASHBOARD DATA
+  // ============================================
+  try {
+
+    const response = await fetch(
+      "http://127.0.0.1:5000/api/reports",
+      {
+        method: "GET",
+        headers: {
+          "X-User-ID": userId,
+          "Authorization": "Bearer " + (token || "")
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    console.log("DASHBOARD REPORTS RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to load reports"
+      );
+    }
+
+    const reports = data.reports || [];
+
+    // ============================================
+    // 1. REPORT COUNT
+    // ============================================
+    const countElement =
+      document.getElementById("stat-count");
+
+    if (countElement) {
+      countElement.textContent = data.count || reports.length;
+    }
+
+    // ============================================
+    // NO REPORTS
+    // ============================================
+    if (reports.length === 0) {
+      showNoReports();
+      return;
+    }
+
+    // ============================================
+    // 2. LATEST REPORT
+    // ============================================
+    const latestReport = reports[0];
+
+    console.log(
+      "LATEST REPORT:",
+      latestReport
+    );
+
+    // Load complete latest report
+    await loadLatestReport(latestReport.id);
+
+    // ============================================
+    // 3. RECENT REPORTS
+    // ============================================
+    renderRecentReports(reports.slice(0, 4));
+
+  } catch (error) {
+
+    console.error(
+      "DASHBOARD LOAD ERROR:",
+      error
+    );
+
+    const tbody =
+      document.getElementById("recent-reports-body");
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center;color:#888;">
+            ${t("backend_unavailable")}
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+
+  // ============================================
+  // LOAD COMPLETE LATEST REPORT
+  // ============================================
+  async function loadLatestReport(reportId) {
+
+    try {
+
+      const language =
+        getCurrentLanguage();
+
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/reports/${reportId}?lang=${language}`,
+        {
+          method: "GET",
+          headers: {
+            "X-User-ID": userId,
+            "Authorization": "Bearer " + (token || ""),
+            "X-Language": language
+          }
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(
+        "LATEST REPORT DETAILS:",
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to load latest report"
+        );
+      }
+
+      const report = data.report;
+
+      // --------------------------------------------
+      // Latest report name
+      // --------------------------------------------
+      const latestName =
+        document.querySelector(
+          '[data-i18n="latest_report"]'
+        );
+
+      // Find the h2 in the latest report card
+      const latestCard =
+        document.querySelector(
+          '[data-i18n="latest_report"]'
+        )?.closest(".stat-card");
+
+      if (latestCard) {
+
+        const heading =
+          latestCard.querySelector("h2");
+
+        const date =
+          latestCard.querySelector(
+            ".stat-label:last-child"
+          );
+
+        if (heading) {
+          heading.textContent =
+            getReportName(report);
+        }
+
+        if (date) {
+          date.textContent =
+            formatDate(report.created_at);
+        }
+      }
+
+      // --------------------------------------------
+      // Render parameters
+      // --------------------------------------------
+      let parameters = report.parameters || [];
+
+// If the parameter extractor returned nothing,
+// use the laboratory results extracted from the report.
+if (
+  parameters.length === 0 &&
+  report.medical_information &&
+  Array.isArray(report.medical_information.lab_results)
+) {
+  parameters = report.medical_information.lab_results.map(result => ({
+    name: result.test_name || "Lab Test",
+    detected:
+      result.value !== undefined
+        ? `${result.value}${result.unit ? " " + result.unit : ""}`
+        : "—",
+    risk:
+      result.status || t("unknown"),
+    normal_range:
+      result.reference_range
+        ? `${result.reference_range.low} - ${result.reference_range.high}`
+        : "—"
+  }));
+}
+
+console.log("DASHBOARD PARAMETERS:", parameters);
+
+renderLatestParameters(parameters);
+updateHealthStatus(parameters);
+updateHealthAdvice(parameters);
+
+    } catch (error) {
+
+      console.error(
+        "LATEST REPORT ERROR:",
+        error
+      );
+    }
+  }
+
+function updateHealthStatus(parameters) {
+  const statusElement = document.getElementById("healthStatusValue");
+
+  if (!statusElement) return;
+
+  if (!Array.isArray(parameters) || parameters.length === 0) {
+    statusElement.textContent = t("unknown");
+    statusElement.style.color = "var(--text-secondary)";
+    return;
+  }
+
+  let abnormalCount = 0;
+
+  parameters.forEach(parameter => {
+    const risk = String(
+      parameter.risk ||
+      parameter.status ||
+      ""
+    ).toLowerCase();
+
+    if (
+      risk.includes("high") ||
+      risk.includes("low") ||
+      risk.includes("abnormal")
+    ) {
+      abnormalCount++;
+    }
+  });
+
+  if (abnormalCount === 0) {
+    statusElement.textContent = t("good");
+    statusElement.style.color = "var(--color-green)";
+  } 
+  else if (abnormalCount <= 2) {
+    statusElement.textContent = t("needs_attention");
+    statusElement.style.color = "#d97706";
+  } 
+  else {
+    statusElement.textContent = t("needs_review");
+    statusElement.style.color = "#dc2626";
+  }
+}
+function updateHealthAdvice(parameters) {
+  const adviceList = document.getElementById("healthAdviceList");
+
+  if (!adviceList) return;
+
+  adviceList.innerHTML = "";
+
+  if (!Array.isArray(parameters) || parameters.length === 0) {
+    adviceList.innerHTML = `
+      <div style="display:flex;gap:10px;">
+        💧
+        <span>${t("balanced_diet_lifestyle_advice")}</span>
+      </div>
+    `;
+    return;
+  }
+
+  const advice = [];
+  const added = new Set();
+
+  parameters.forEach(parameter => {
+    const name = String(
+      parameter.name ||
+      parameter.parameter ||
+      parameter.test ||
+      ""
+    ).toLowerCase();
+
+    const risk = String(
+      parameter.risk ||
+      parameter.status ||
+      ""
+    ).toLowerCase();
+
+    // Hemoglobin / anemia-related
+    if (
+      (name.includes("hemoglobin") || name.includes("haemoglobin")) &&
+      risk.includes("low") &&
+      !added.has("iron")
+    ) {
+      advice.push({
+        icon: "🥬",
+        text: t("low_hemoglobin_advice")
+      });
+      added.add("iron");
+    }
+
+    // WBC
+    if (
+      name.includes("wbc") &&
+      (risk.includes("high") || risk.includes("low")) &&
+      !added.has("wbc")
+    ) {
+      advice.push({
+        icon: "🩺",
+        text: t("abnormal_wbc_advice")
+      });
+      added.add("wbc");
+    }
+
+    // Platelets
+    if (
+      name.includes("platelet") &&
+      (risk.includes("high") || risk.includes("low")) &&
+      !added.has("platelets")
+    ) {
+      advice.push({
+        icon: "🩸",
+        text: t("abnormal_platelets_advice")
+      });
+      added.add("platelets");
+    }
+
+    // Blood sugar / glucose
+    if (
+      (
+        name.includes("glucose") ||
+        name.includes("blood sugar") ||
+        name.includes("blood glucose")
+      ) &&
+      risk.includes("high") &&
+      !added.has("sugar")
+    ) {
+      advice.push({
+        icon: "🍎",
+        text: t("high_blood_sugar_advice")
+      });
+      added.add("sugar");
+    }
+
+    // Cholesterol
+    if (
+      (
+        name.includes("cholesterol") ||
+        name.includes("ldl")
+      ) &&
+      risk.includes("high") &&
+      !added.has("cholesterol")
+    ) {
+      advice.push({
+        icon: "🥗",
+        text: t("high_cholesterol_advice")
+      });
+      added.add("cholesterol");
+    }
+
+    // Triglycerides
+    if (
+      name.includes("triglyceride") &&
+      risk.includes("high") &&
+      !added.has("triglycerides")
+    ) {
+      advice.push({
+        icon: "🥗",
+        text: t("high_triglycerides_advice")
+      });
+      added.add("triglycerides");
+    }
+
+    // Vitamin D
+    if (
+      name.includes("vitamin d") &&
+      risk.includes("low") &&
+      !added.has("vitaminD")
+    ) {
+      advice.push({
+        icon: "☀️",
+        text: t("low_vitamin_d_advice")
+      });
+      added.add("vitaminD");
+    }
+  });
+
+  // General advice
+  if (!added.has("water")) {
+    advice.push({
+      icon: "💧",
+      text: t("hydration_advice")
+    });
+  }
+
+  if (!added.has("exercise")) {
+    advice.push({
+      icon: "🏃",
+      text: t("exercise_advice")
+    });
+  }
+
+  // Display maximum 4 recommendations
+  advice.slice(0, 4).forEach(item => {
+    const row = document.createElement("div");
+
+    row.style.display = "flex";
+    row.style.gap = "10px";
+
+    row.innerHTML = `
+      <span>${item.icon}</span>
+      <span>${item.text}</span>
+    `;
+
+    adviceList.appendChild(row);
+  });
+}
+  // ============================================
+  // RENDER LATEST PARAMETERS
+  // ============================================
+  function renderLatestParameters(parameters) {
+  const container = document.getElementById("latestParametersContainer");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!Array.isArray(parameters) || parameters.length === 0) {
+    container.innerHTML = `
+      <div style="color:var(--color-text-muted);font-size:13.5px;">
+        ${t("no_extracted_parameters")}
+      </div>
+    `;
+    return;
+  }
+
+  // Show the most important parameters first
+  const priority = [
+    "hemoglobin",
+    "blood sugar",
+    "glucose",
+    "cholesterol",
+    "platelet",
+    "wbc",
+    "white blood",
+    "rbc",
+    "red blood",
+    "vitamin d"
+  ];
+
+  const sortedParameters = [...parameters].sort((a, b) => {
+    const nameA = String(a.name || "").toLowerCase();
+    const nameB = String(b.name || "").toLowerCase();
+
+    const indexA = priority.findIndex(p => nameA.includes(p));
+    const indexB = priority.findIndex(p => nameB.includes(p));
+
+    const priorityA = indexA === -1 ? 999 : indexA;
+    const priorityB = indexB === -1 ? 999 : indexB;
+
+    return priorityA - priorityB;
+  });
+
+  // Display maximum 5 parameters
+  sortedParameters.slice(0, 5).forEach(parameter => {
+
+    const name =
+      parameter.name ||
+      parameter.parameter ||
+      parameter.test ||
+      t("unknown");
+
+    const value =
+      parameter.detected ??
+      parameter.value ??
+      parameter.result ??
+      "—";
+
+    const unit =
+      parameter.unit ||
+      "";
+
+    const status =
+      parameter.risk ||
+      parameter.status ||
+      t("unknown");
+
+    const statusText = String(status);
+
+    let badgeClass = "badge-green";
+
+    if (
+      statusText.toLowerCase().includes("high") ||
+      statusText.toLowerCase().includes("abnormal")
+    ) {
+      badgeClass = "badge-red";
+    } else if (
+      statusText.toLowerCase().includes("low")
+    ) {
+      badgeClass = "badge-amber";
+    }
+
+    const row = document.createElement("div");
+
+    row.className = "metric-row";
+
+    row.innerHTML = `
+      <div class="m-name">
+        🧪
+        <span>${name}</span>
+      </div>
+
+      <div style="color:var(--color-text-muted);font-size:13.5px;">
+        ${value}${unit ? " " + unit : ""}
+      </div>
+
+      <span class="badge ${badgeClass}">
+        ${statusText}
+      </span>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+
+  // ============================================
+  // RECENT REPORTS TABLE
+  // ============================================
+  function renderRecentReports(reports) {
+
+    const tbody =
+      document.getElementById(
+        "recent-reports-body"
+      );
+
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    reports.forEach(report => {
+
+      const row =
+        document.createElement("tr");
+
+      row.innerHTML = `
+        <td>
+          ${escapeHtml(getReportName(report))}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            formatDate(report.created_at)
+          )}
+        </td>
+
+        <td>
+          <span class="badge badge-green">
+            ${t("processed")}
+          </span>
+        </td>
+
+        <td class="row-actions">
+          <a href="reports.html?id=${report.id}">
+            👁
+          </a>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+
+  // ============================================
+  // NO REPORTS
+  // ============================================
+  function showNoReports() {
+
+    const tbody =
+      document.getElementById(
+        "recent-reports-body"
+      );
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4"
+              style="text-align:center;color:var(--color-text-muted);padding:20px;">
+            ${t("no_reports_uploaded")}
+          </td>
+        </tr>
+      `;
+    }
+
+    // Latest report card
+    const card =
+      document.querySelector(
+        '[data-i18n="simplified_report_latest"]'
+      )?.closest(".card");
+
+    if (card) {
+
+      card.querySelectorAll(".metric-row")
+        .forEach(row => row.remove());
+
+      const message =
+        document.createElement("p");
+
+      message.style.cssText =
+        "color:var(--color-text-muted);font-size:13px;";
+
+      message.textContent =
+        t("upload_first_report");
+
+      const note =
+        card.querySelector(
+          '[data-i18n="abnormal_values"]'
+        );
+
+      if (note) {
+        card.insertBefore(message, note);
+      }
+    }
+  }
+
+
+  // ============================================
+  // REPORT NAME
+  // ============================================
+  function getReportName(report) {
+
+    if (!report) return t("medical_report");
+
+    let fileName =
+      report.file_name || "";
+
+    // Remove UUID added by backend
+    // Example:
+    // abc123_CBC.pdf
+    fileName =
+      fileName.replace(
+        /^[a-f0-9]{32}_/i,
+        ""
+      );
+
+    // Remove extension
+    fileName =
+      fileName.replace(
+        /\.[^/.]+$/,
+        ""
+      );
+
+    if (!fileName) {
+      return t("medical_report");
+    }
+
+    return fileName;
+  }
+
+
+  // ============================================
+  // DATE FORMAT
+  // ============================================
+  function formatDate(dateValue) {
+
+    if (!dateValue) {
+      return "—";
+    }
+
+    const date =
+      new Date(dateValue);
+
+    if (isNaN(date.getTime())) {
+      return dateValue;
+    }
+
+    const locale = {
+      en: "en-IN",
+      te: "te-IN",
+      hi: "hi-IN"
+    }[getCurrentLanguage()] || "en-IN";
+
+    return date.toLocaleDateString(
+      locale,
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }
+    );
+  }
+
+
+  // ============================================
+  // BADGE COLOR
+  // ============================================
+  function getBadgeClass(risk) {
+
+    const value =
+      String(risk).toLowerCase();
+
+    if (value === "normal") {
+      return "badge-green";
+    }
+
+    if (
+      value === "slightly high" ||
+      value === "slightly low"
+    ) {
+      return "badge-amber";
+    }
+
+    if (
+      value === "high" ||
+      value === "low"
+    ) {
+      return "badge-red";
+    }
+
+    return "badge-amber";
+  }
+
+
+  // ============================================
+  // PARAMETER ICON
+  // ============================================
+  function getParameterIcon(name) {
+
+    const value =
+      String(name).toLowerCase();
+
+    if (value.includes("hemoglobin")) return "💧";
+    if (value.includes("sugar")) return "🩸";
+    if (value.includes("glucose")) return "🩸";
+    if (value.includes("cholesterol")) return "❤️";
+    if (value.includes("platelet")) return "🧬";
+    if (value.includes("vitamin")) return "🛡️";
+    if (value.includes("heart")) return "❤️";
+    if (value.includes("blood pressure")) return "🩺";
+
+    return "🧪";
+  }
+
+
+  // ============================================
+  // HTML SAFETY
+  // ============================================
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+
+});
+// ============================================
+// DASHBOARD MAP
+// ============================================
+
+let dashboardMap;
+let userMarker;
+
+function initializeDashboardMap() {
+
+  const mapElement = document.getElementById("dashboard-map");
+
+  if (!mapElement) return;
+
+  // Default location: Vijayawada
+  // This is only used until the user's location is detected.
+  const defaultLocation = [16.5062, 80.6480];
+
+  dashboardMap = L.map("dashboard-map").setView(defaultLocation, 13);
+
+  // OpenStreetMap tiles
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      attribution: '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(dashboardMap);
+
+  
+
+  // Try to get user's current location
+  if (navigator.geolocation) {
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const userLocation = [latitude, longitude];
+
+        dashboardMap.setView(userLocation, 14);
+        // Load real nearby healthcare locations
+        loadNearbyHealthcare(latitude, longitude);
+
+        userMarker = L.marker(userLocation)
+          .addTo(dashboardMap)
+          .bindPopup(`<b>📍 ${t("you_are_here")}</b>`)
+          .openPopup();
+
+      },
+
+      function(error) {
+
+        console.log(
+          "Location permission not available. Using default location."
+        );
+
+      }
+    );
+
+  } else {
+
+    console.log("Geolocation is not supported by this browser.");
+
+  }
+}
+
+
+// ============================================
+// HEALTHCARE MARKERS
+// ============================================
+
+// ============================================
+// REAL NEARBY HEALTHCARE LOCATIONS
+// ============================================
+
+let healthcareLayer = L.layerGroup();
+
+function loadNearbyHealthcare(latitude, longitude) {
+
+  healthcareLayer.clearLayers();
+  healthcareLayer.addTo(dashboardMap);
+
+  const radius = 5000; // 5 km
+
+  const query = `
+    [out:json][timeout:25];
+
+    (
+      nwr["amenity"="hospital"](around:${radius},${latitude},${longitude});
+      nwr["amenity"="pharmacy"](around:${radius},${latitude},${longitude});
+      nwr["healthcare"="laboratory"](around:${radius},${latitude},${longitude});
+      nwr["amenity"="clinic"](around:${radius},${latitude},${longitude});
+    );
+
+    out center tags;
+  `;
+
+  const url =
+    "https://overpass-api.de/api/interpreter?data=" +
+    encodeURIComponent(query);
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Unable to load nearby healthcare locations.");
+      }
+
+      return response.json();
+    })
+
+    .then(data => {
+
+      console.log("REAL HEALTHCARE DATA:", data);
+
+      const places = data.elements || [];
+
+      if (places.length === 0) {
+        console.log("No healthcare locations found nearby.");
+        return;
+      }
+
+      places.forEach(place => {
+
+        const tags = place.tags || {};
+
+        const lat =
+          place.lat ??
+          place.center?.lat;
+
+        const lon =
+          place.lon ??
+          place.center?.lon;
+
+        if (
+          typeof lat !== "number" ||
+          typeof lon !== "number"
+        ) {
+          return;
+        }
+
+        const name =
+          tags.name ||
+          t("healthcare_location");
+
+        let type = "Healthcare";
+        let icon = "🏥";
+        let page = "hospitals.html";
+
+        if (tags.amenity === "pharmacy") {
+
+          type = t("medical_shop");
+          icon = "💊";
+          page = "medicalshops.html";
+
+        } else if (tags.healthcare === "laboratory") {
+
+          type = t("diagnostic_lab");
+          icon = "🧪";
+          page = "labs.html";
+
+        } else if (tags.amenity === "clinic") {
+
+          type = t("clinic");
+          icon = "🩺";
+          page = "hospitals.html";
+
+        } else {
+
+          type = t("hospital");
+          icon = "🏥";
+          page = "hospitals.html";
+        }
+
+        const address =
+          tags["addr:street"]
+            ? `${tags["addr:housenumber"] || ""} ${tags["addr:street"]}`
+            : t("address_not_available");
+
+        const popup = `
+          <div style="min-width:190px;">
+
+            <strong style="font-size:14px;">
+              ${icon} ${escapeHtml(name)}
+            </strong>
+
+            <br>
+
+            <span style="font-size:12px;color:#666;">
+              ${type}
+            </span>
+
+            <br><br>
+
+            <span style="font-size:12px;">
+              📍 ${escapeHtml(address)}
+            </span>
+
+            <br><br>
+
+            <a
+              href="${page}"
+              style="
+                font-size:12px;
+                font-weight:600;
+                color:#2563eb;
+              "
+            >
+              ${t("view_details")} →
+            </a>
+
+            <br>
+
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}"
+              target="_blank"
+              style="
+                font-size:12px;
+                font-weight:600;
+                color:#16a34a;
+              "
+            >
+              🧭 ${t("get_directions")} →
+            </a>
+
+          </div>
+        `;
+
+        L.marker([lat, lon])
+          .addTo(healthcareLayer)
+          .bindPopup(popup);
+
+      });
+
+    })
+
+    .catch(error => {
+
+      console.error(
+        "HEALTHCARE MAP ERROR:",
+        error
+      );
+
+    });
+}
+
+// ============================================
+// MY LOCATION BUTTON
+// ============================================
+
+document
+  .getElementById("locate-me-btn")
+  ?.addEventListener("click", function() {
+
+    if (!navigator.geolocation) {
+
+      alert(t("geolocation_not_supported"));
+      return;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+      function(position) {
+
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const userLocation = [latitude, longitude];
+
+        dashboardMap.setView(userLocation, 15);
+        // Reload real nearby healthcare locations
+        loadNearbyHealthcare(latitude, longitude);
+
+        if (userMarker) {
+          dashboardMap.removeLayer(userMarker);
+        }
+
+        userMarker = L.marker(userLocation)
+          .addTo(dashboardMap)
+          .bindPopup(`<b>📍 ${t("you_are_here")}</b>`)
+          .openPopup();
+
+      },
+
+      function() {
+
+        alert(t("geolocation_permission_denied"));
+
+      }
+
+    );
+
+  });
+
+
+// ============================================
+// START MAP
+// ============================================
+
+initializeDashboardMap();
+
+</script>
+</body>
+</html>

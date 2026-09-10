@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Report History — MediDecode</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <div id="app-sidebar" data-active="history"></div>
+
+  <div class="main-col">
+
+    <div
+      id="app-topbar"
+      data-title-key="report_history"
+      data-subtitle-key="dashboard_subtitle">
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+
+        <div class="page-toolbar">
+
+          <div class="search-box">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8">
+
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m21 21-4.3-4.3"/>
+
+            </svg>
+
+            <input
+              type="text"
+              id="search-input"
+              data-i18n-placeholder="search"
+              placeholder="Search reports">
+
+          </div>
+
+          <div style="display:flex;gap:10px;">
+
+            <select
+              id="sort-select"
+              class="field"
+              style="margin:0;">
+
+              <option value="date-desc" data-i18n="history_sort_newest">Newest First</option>
+              <option value="date-asc" data-i18n="history_sort_oldest">Oldest First</option>
+              <option value="name-asc" data-i18n="history_sort_name">Name A–Z</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- Loading message -->
+
+        <div
+          id="history-loading"
+          style="
+            text-align:center;
+            padding:40px;
+            color:var(--color-text-muted);
+          ">
+
+          <span data-i18n="history_loading_reports">Loading reports...</span>
+
+        </div>
+
+
+        <!-- Error message -->
+
+        <div
+          id="history-error"
+          style="
+            display:none;
+            text-align:center;
+            padding:40px;
+            color:#dc2626;
+          ">
+
+        </div>
+
+
+        <!-- History table -->
+
+        <table
+          class="table"
+          id="history-table"
+          style="display:none;">
+
+          <thead>
+
+            <tr>
+              <th data-i18n="history_report_name">Report Name</th>
+              <th data-i18n="history_type">Type</th>
+              <th data-i18n="history_date">Date</th>
+              <th data-i18n="history_status">Status</th>
+              <th data-i18n="history_action">Action</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="history-body"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+
+
+<script>
+
+const API_BASE = "http://localhost:5000";
+
+const userId = localStorage.getItem("medidecode_user_id");
+
+const tbody = document.getElementById("history-body");
+
+const searchInput =
+  document.getElementById("search-input");
+
+const sortSelect =
+  document.getElementById("sort-select");
+
+const loading =
+  document.getElementById("history-loading");
+
+const errorBox =
+  document.getElementById("history-error");
+
+const historyTable =
+  document.getElementById("history-table");
+
+
+// ============================================================
+// REPORT STORAGE
+// ============================================================
+
+let REPORTS = [];
+
+
+// ============================================================
+// FORMAT DATE
+// ============================================================
+
+function fmtDate(dateValue) {
+
+  if (!dateValue) {
+    return "—";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }
+  );
+}
+
+
+// ============================================================
+// GET DISPLAY NAME
+// ============================================================
+
+function getReportName(report) {
+
+  if (!report.file_name) {
+    return "Medical Report";
+  }
+
+  /*
+   * Your database stores the generated filename:
+   *
+   * uuid_filename.jpg
+   *
+   * Remove the UUID portion so the user sees
+   * the original filename.
+   */
+
+  let name = report.file_name;
+
+  const underscoreIndex = name.indexOf("_");
+
+  if (underscoreIndex !== -1) {
+    name = name.substring(
+      underscoreIndex + 1
+    );
+  }
+
+  // Remove file extension
+
+  name = name.replace(
+    /\.(pdf|jpg|jpeg|png)$/i,
+    ""
+  );
+
+  // Replace underscores with spaces
+
+  name = name.replace(/[_-]+/g, " ");
+
+  return name || "Medical Report";
+}
+
+
+// ============================================================
+// GET REPORT TYPE
+// ============================================================
+
+function getReportType(report) {
+
+  const type =
+    String(report.report_type || "")
+      .toLowerCase();
+
+  if (type === "pdf") {
+    return "PDF";
+  }
+
+  if (type === "jpg" ||
+      type === "jpeg" ||
+      type === "png") {
+
+    return "Image";
+  }
+
+  return type
+    ? type.toUpperCase()
+    : "Report";
+}
+
+
+// ============================================================
+// LOAD REPORTS
+// ============================================================
+
+async function loadReports() {
+
+  console.log(
+    "HISTORY USER ID:",
+    userId
+  );
+
+
+  if (!userId) {
+
+    loading.style.display = "none";
+
+    errorBox.style.display = "block";
+
+    errorBox.textContent =
+      "User session not found. Please login again.";
+
+    return;
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `${API_BASE}/api/reports`,
+      {
+        method: "GET",
+
+        headers: {
+          "X-User-ID": userId
+        }
+      }
+    );
+
+
+    const data = await response.json();
+
+    console.log(
+      "HISTORY RESPONSE:",
+      data
+    );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message ||
+        "Unable to load report history"
+      );
+
+    }
+
+
+    REPORTS =
+      Array.isArray(data.reports)
+        ? data.reports
+        : [];
+
+
+    loading.style.display = "none";
+
+    historyTable.style.display = "table";
+
+
+    render();
+
+
+  } catch (error) {
+
+    console.error(
+      "HISTORY LOAD ERROR:",
+      error
+    );
+
+    loading.style.display = "none";
+
+    errorBox.style.display = "block";
+
+    errorBox.textContent =
+      error.message ||
+      "Unable to load report history.";
+
+  }
+
+}
+
+
+// ============================================================
+// RENDER HISTORY
+// ============================================================
+
+function render() {
+
+  let rows = [...REPORTS];
+
+
+  // ----------------------------------------------------------
+  // SEARCH
+  // ----------------------------------------------------------
+
+  const query =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  if (query) {
+
+    rows = rows.filter(report => {
+
+      const name =
+        getReportName(report)
+          .toLowerCase();
+
+      const type =
+        getReportType(report)
+          .toLowerCase();
+
+      return (
+        name.includes(query) ||
+        type.includes(query)
+      );
+
+    });
+
+  }
+
+
+  // ----------------------------------------------------------
+  // SORT
+  // ----------------------------------------------------------
+
+  const sort =
+    sortSelect.value;
+
+
+  if (sort === "date-desc") {
+
+    rows.sort(
+      (a, b) =>
+        new Date(b.created_at) -
+        new Date(a.created_at)
+    );
+
+  }
+
+
+  if (sort === "date-asc") {
+
+    rows.sort(
+      (a, b) =>
+        new Date(a.created_at) -
+        new Date(b.created_at)
+    );
+
+  }
+
+
+  if (sort === "name-asc") {
+
+    rows.sort(
+      (a, b) =>
+        getReportName(a)
+          .localeCompare(
+            getReportName(b)
+          )
+    );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // EMPTY STATE
+  // ----------------------------------------------------------
+
+  if (rows.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+
+        <td
+          colspan="5"
+          style="
+            text-align:center;
+            color:var(--color-text-muted);
+            padding:30px;
+          ">
+
+          ${
+            REPORTS.length === 0
+              ? "No reports uploaded yet."
+              : "No reports found."
+          }
+
+        </td>
+
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  // ----------------------------------------------------------
+  // TABLE
+  // ----------------------------------------------------------
+
+  tbody.innerHTML = rows.map(report => {
+
+    const name =
+      getReportName(report);
+
+    const type =
+      getReportType(report);
+
+    const date =
+      fmtDate(report.created_at);
+
+    return `
+
+      <tr>
+
+        <td>
+          ${escapeHtml(name)}
+        </td>
+
+        <td>
+          ${escapeHtml(type)}
+        </td>
+
+        <td>
+          ${date}
+        </td>
+
+        <td>
+          <span class="badge badge-green">
+            Processed
+          </span>
+        </td>
+
+        <td class="row-actions">
+
+          <!-- VIEW -->
+
+          <a
+            href="reports.html?report_id=${encodeURIComponent(report.id)}"
+            title="View">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8">
+
+              <path
+                d="M2 12s4-7 10-7
+                   10 7 10 7-4 7-10 7
+                   -10-7-10-7Z"/>
+
+              <circle
+                cx="12"
+                cy="12"
+                r="3"/>
+
+            </svg>
+
+          </a>
+
+
+          <!-- DOWNLOAD -->
+
+          <a
+            href="#"
+            class="download-link"
+            data-id="${report.id}"
+            title="Download">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8">
+
+              <path d="M12 4v12"/>
+              <path d="M6 12l6 4 6-4"/>
+              <path d="M4 20h16"/>
+
+            </svg>
+
+          </a>
+
+
+          <!-- DELETE -->
+
+          <a
+            href="#"
+            class="delete-link"
+            data-id="${report.id}"
+            data-name="${escapeHtml(name)}"
+            title="Delete">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8">
+
+              <path d="M4 7h16"/>
+              <path d="M9 7V4h6v3"/>
+              <path d="M6 7l1 13h10l1-13"/>
+
+            </svg>
+
+          </a>
+
+        </td>
+
+      </tr>
+
+    `;
+
+  }).join("");
+
+
+  // ----------------------------------------------------------
+  // DOWNLOAD EVENTS
+  // ----------------------------------------------------------
+
+  tbody
+    .querySelectorAll(".download-link")
+    .forEach(link => {
+
+      link.addEventListener(
+        "click",
+        function(event) {
+
+          event.preventDefault();
+
+          const reportId =
+            this.dataset.id;
+
+          downloadReport(reportId);
+
+        }
+      );
+
+    });
+
+
+  // ----------------------------------------------------------
+  // DELETE EVENTS
+  // ----------------------------------------------------------
+
+  tbody
+    .querySelectorAll(".delete-link")
+    .forEach(link => {
+
+      link.addEventListener(
+        "click",
+        function(event) {
+
+          event.preventDefault();
+
+          const reportId =
+            this.dataset.id;
+
+          const reportName =
+            this.dataset.name;
+
+          deleteReport(
+            reportId,
+            reportName
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+// ============================================================
+// VIEW / REPORTS PAGE
+// ============================================================
+
+/*
+ * reports.html should read:
+ *
+ * ?report_id=5
+ *
+ * and load that report.
+ *
+ * We are already sending the ID above.
+ */
+
+
+// ============================================================
+// DOWNLOAD
+// ============================================================
+
+async function downloadReport(reportId) {
+  try {
+    if (!userId) {
+      showToast("Please login again.");
+      return;
+    }
+
+    showToast("Preparing download...");
+
+    const response = await fetch(
+      `${API_BASE}/api/reports/${encodeURIComponent(reportId)}/download`,
+      {
+        method: "GET",
+        headers: {
+          "X-User-ID": userId
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      throw new Error(
+        errorData.message ||
+        `Download failed (HTTP ${response.status})`
+      );
+    }
+
+    const blob = await response.blob();
+
+    const contentDisposition =
+      response.headers.get("Content-Disposition");
+
+    let fileName = "medical-report";
+
+    if (contentDisposition) {
+      const match = contentDisposition.match(
+        /filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i
+      );
+
+      if (match && match[1]) {
+        fileName = decodeURIComponent(match[1]);
+      }
+    }
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    showToast("Report downloaded successfully.");
+
+  } catch (error) {
+    console.error("DOWNLOAD ERROR:", error);
+
+    showToast(
+      error.message || "Unable to download report."
+    );
+  }
+}
+
+
+// ============================================================
+// DELETE
+// ============================================================
+
+async function deleteReport(reportId, reportName) {
+  const confirmed = confirm(
+    `Delete "${reportName}"? This cannot be undone.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/reports/${encodeURIComponent(reportId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          "X-User-ID": userId
+        }
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    console.log("DELETE RESPONSE:", data);
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to delete report"
+      );
+    }
+
+    // Remove the deleted report from the local array
+    REPORTS = REPORTS.filter(
+      report => String(report.id) !== String(reportId)
+    );
+
+    // Re-render history
+    render();
+
+    showToast(
+      data.message || "Report deleted successfully."
+    );
+
+  } catch (error) {
+    console.error("DELETE REPORT ERROR:", error);
+
+    showToast(
+      error.message || "Unable to delete report."
+    );
+  }
+}
+
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+searchInput.addEventListener(
+  "input",
+  render
+);
+
+sortSelect.addEventListener(
+  "change",
+  render
+);
+
+
+// ============================================================
+// START
+// ============================================================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadReports
+);
+
+</script>
+
+</body>
+</html>

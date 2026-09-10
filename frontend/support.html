@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Help & Support — MediDecode</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+
+  <div id="app-sidebar" data-active="support"></div>
+
+  <!-- MAIN CONTENT -->
+
+  <div class="main-col">
+
+```
+<!-- TOPBAR -->
+<div
+  id="app-topbar"
+  data-title-key="help_support"
+  data-subtitle-key="check_faq">
+</div>
+
+<div class="content">
+
+  <div class="grid-2-1-1">
+
+    <!-- =========================
+         FAQ SECTION
+    ========================== -->
+    <div class="card">
+
+      <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="faq_title">
+        Frequently Asked Questions
+      </h3>
+
+      <!-- FAQ 1 -->
+      <div class="faq-item open">
+
+        <div class="faq-q">
+          Is my medical data kept private?
+          <span class="faq-chevron">▾</span>
+        </div>
+
+        <p class="faq-a">
+          Yes. Reports are securely stored and are intended to be accessible
+          only through your account. MediDecode does not share your data with
+          third parties without appropriate consent.
+        </p>
+
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="faq-item">
+
+        <div class="faq-q">
+          Which file types can I upload?
+          <span class="faq-chevron">▾</span>
+        </div>
+
+        <p class="faq-a">
+          You can upload PDF reports or JPG/PNG images of medical reports.
+          You can also capture a photo directly using a supported device.
+        </p>
+
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="faq-item">
+
+        <div class="faq-q">
+          How accurate is the simplified explanation?
+          <span class="faq-chevron">▾</span>
+        </div>
+
+        <p class="faq-a">
+          MediDecode uses OCR and medical reference information to help
+          explain medical terms and values in simpler language. The
+          information is for understanding and should not be treated as a
+          medical diagnosis. Always consult a qualified healthcare
+          professional for medical decisions.
+        </p>
+
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="faq-item">
+
+        <div class="faq-q">
+          Can I change my language later?
+          <span class="faq-chevron">▾</span>
+        </div>
+
+        <p class="faq-a">
+          Yes. You can change your preferred language from the Settings
+          section at any time.
+        </p>
+
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="faq-item">
+
+        <div class="faq-q">
+          How do I delete a report?
+          <span class="faq-chevron">▾</span>
+        </div>
+
+        <p class="faq-a">
+          Open Report History, find the report you want to remove, and use
+          the available delete action.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         CONTACT SUPPORT
+    ========================== -->
+    <div class="card">
+
+      <h3 style="margin:0 0 14px;font-size:16px;" data-i18n="contact_support_title">
+        Contact Support
+      </h3>
+
+      <p
+        style="
+          font-size:13px;
+          color:var(--color-text-muted);
+          line-height:1.6;
+          margin:0 0 18px;
+        "
+        data-i18n="contact_support_text"
+      >
+        Have a problem or need help? Send us a support request and our team
+        will get back to you.
+      </p>
+
+
+      <!-- SUPPORT FORM -->
+      <form id="supportForm">
+
+        <!-- NAME -->
+        <div style="margin-bottom:14px;">
+
+          <label
+            for="supportName"
+            style="
+              display:block;
+              font-size:13px;
+              font-weight:600;
+              margin-bottom:6px;
+            "
+            data-i18n="support_name"
+          >
+            Name
+          </label>
+
+          <input
+            type="text"
+            id="supportName"
+            name="name"
+            placeholder="Enter your name"
+            required
+            autocomplete="name"
+            data-i18n-placeholder="support_name_placeholder"
+            style="
+              width:100%;
+              padding:10px 12px;
+              border:1px solid var(--color-border);
+              border-radius:8px;
+              font-family:inherit;
+              font-size:13px;
+              box-sizing:border-box;
+            "
+          >
+
+        </div>
+
+
+        <!-- EMAIL -->
+        <div style="margin-bottom:14px;">
+
+          <label
+            for="supportEmail"
+            style="
+              display:block;
+              font-size:13px;
+              font-weight:600;
+              margin-bottom:6px;
+            "
+            data-i18n="support_email"
+          >
+            Email
+          </label>
+
+          <input
+            type="email"
+            id="supportEmail"
+            name="email"
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+            data-i18n-placeholder="support_email_placeholder"
+            style="
+              width:100%;
+              padding:10px 12px;
+              border:1px solid var(--color-border);
+              border-radius:8px;
+              font-family:inherit;
+              font-size:13px;
+              box-sizing:border-box;
+            "
+          >
+
+        </div>
+
+
+        <!-- CATEGORY -->
+        <div style="margin-bottom:14px;">
+
+          <label
+            for="supportCategory"
+            style="
+              display:block;
+              font-size:13px;
+              font-weight:600;
+              margin-bottom:6px;
+            "
+            data-i18n="support_issue_category"
+          >
+            Issue Category
+          </label>
+
+          <select
+            id="supportCategory"
+            name="category"
+            required
+            style="
+              width:100%;
+              padding:10px 12px;
+              border:1px solid var(--color-border);
+              border-radius:8px;
+              font-family:inherit;
+              font-size:13px;
+              box-sizing:border-box;
+            "
+          >
+
+            <option value="" data-i18n="support_issue_select">Select an issue</option>
+            <option value="Report Upload" data-i18n="support_issue_report_upload">Report Upload</option>
+            <option value="Report Decoding" data-i18n="support_issue_report_decoding">Report Decoding</option>
+            <option value="Account" data-i18n="support_issue_account">Account</option>
+            <option value="Language" data-i18n="support_issue_language">Language</option>
+            <option value="Technical Problem" data-i18n="support_issue_technical">Technical Problem</option>
+            <option value="Other" data-i18n="support_issue_other">Other</option>
+
+          </select>
+
+        </div>
+
+
+        <!-- MESSAGE -->
+        <div style="margin-bottom:16px;">
+
+          <label
+            for="supportMessage"
+            style="
+              display:block;
+              font-size:13px;
+              font-weight:600;
+              margin-bottom:6px;
+            "
+            data-i18n="support_message"
+          >
+            Message
+          </label>
+
+          <textarea
+            id="supportMessage"
+            name="message"
+            rows="5"
+            placeholder="Describe your problem..."
+            required
+            minlength="5"
+            data-i18n-placeholder="support_message_placeholder"
+            style="
+              width:100%;
+              padding:10px 12px;
+              border:1px solid var(--color-border);
+              border-radius:8px;
+              font-family:inherit;
+              font-size:13px;
+              box-sizing:border-box;
+              resize:vertical;
+            "
+          ></textarea>
+
+        </div>
+
+
+        <!-- SUBMIT BUTTON -->
+        <button
+          type="submit"
+          id="supportSubmitBtn"
+          class="btn btn-primary btn-block"
+          data-i18n="support_submit"
+        >
+          Submit Support Request
+        </button>
+
+
+        <!-- MESSAGE BOX -->
+        <div
+          id="supportMessageBox"
+          role="alert"
+          aria-live="polite"
+          style="
+            display:none;
+            margin-top:14px;
+            padding:10px 12px;
+            border-radius:8px;
+            font-size:13px;
+          "
+        ></div>
+
+      </form>
+
+
+      <!-- =========================
+           OTHER CONTACT METHODS
+      ========================== -->
+
+      <h3 style="margin:24px 0 10px;font-size:16px;" data-i18n="other_ways_title">
+        Other Ways to Contact Us
+      </h3>
+
+
+      <!-- EMAIL -->
+      <div class="list-item">
+
+        <div
+          class="list-icon"
+          style="
+            background:var(--color-primary-light);
+            color:var(--color-primary);
+          "
+        >
+          ✉️
+        </div>
+
+        <div>
+
+          <h4 data-i18n="other_ways_email">Email</h4>
+
+          <p data-i18n="support_email_value">
+            support@medidecode.app
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- PHONE -->
+      <div class="list-item">
+
+        <div
+          class="list-icon"
+          style="
+            background:var(--color-green-light);
+            color:var(--color-green);
+          "
+        >
+          📞
+        </div>
+
+        <div>
+
+          <h4 data-i18n="other_ways_phone">Phone</h4>
+
+          <p data-i18n="support_phone_value">
+            +91 1800 123 4567 (Mon–Sat, 9 AM – 7 PM)
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- LIVE CHAT -->
+      <div class="list-item">
+
+        <div
+          class="list-icon"
+          style="
+            background:var(--color-purple-light);
+            color:var(--color-purple);
+          "
+        >
+          💬
+        </div>
+
+        <div>
+
+          <h4 data-i18n="other_ways_live_chat">Live Chat</h4>
+
+          <p data-i18n="support_live_chat_value">
+            Available inside the app during business hours
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================
+           ABOUT
+      ========================== -->
+
+      <h3 style="margin:22px 0 10px;font-size:16px;" data-i18n="about_medi_decode">
+        About MediDecode
+      </h3>
+
+      <p
+        style="
+          font-size:13px;
+          color:var(--color-text-muted);
+          line-height:1.7;
+          margin:0 0 14px;
+        "
+        data-i18n="about_medi_decode_text"
+      >
+        MediDecode turns confusing medical reports into plain-language
+        explanations, so anyone can understand their own health data —
+        no medical background required.
+      </p>
+
+
+      <!-- FEEDBACK -->
+      <button
+        class="btn btn-outline btn-block"
+        onclick="window.location.href='feedback.html'"
+        data-i18n="send_feedback"
+      >
+        Send Feedback
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =========================
+     APP SHELL
+========================== -->
+
+<script src="js/app-shell.js"></script>
+
+<script src="js/i18n.js"></script>
+
+<script>
+/* ==========================================
+   FAQ ACCORDION
+========================================== */
+
+document.querySelectorAll(".faq-item").forEach((item) => {
+
+  const question = item.querySelector(".faq-q");
+
+  if (!question) return;
+
+  question.addEventListener("click", () => {
+
+    const isOpen = item.classList.contains("open");
+
+    document
+      .querySelectorAll(".faq-item")
+      .forEach((faq) => faq.classList.remove("open"));
+
+    if (!isOpen) {
+      item.classList.add("open");
+    }
+
+  });
+
+});
+</script>
+
+<script>
+/* ==========================================
+   LOAD SAVED USER INFORMATION
+========================================== */
+
+const savedName =
+  localStorage.getItem("medidecode_name");
+
+const savedEmail =
+  localStorage.getItem("medidecode_email");
+
+const nameInput =
+  document.getElementById("supportName");
+
+const emailInput =
+  document.getElementById("supportEmail");
+
+if (savedName) {
+  nameInput.value = savedName;
+}
+
+if (savedEmail) {
+  emailInput.value = savedEmail;
+}
+</script>
+
+<script>
+/* ==========================================
+   SUPPORT FORM SUBMISSION
+========================================== */
+
+const supportForm =
+  document.getElementById("supportForm");
+
+const supportSubmitBtn =
+  document.getElementById("supportSubmitBtn");
+
+const supportMessageBox =
+  document.getElementById("supportMessageBox");
+
+
+function showSupportMessage(message, type) {
+
+  supportMessageBox.style.display = "block";
+
+  if (type === "success") {
+
+    supportMessageBox.style.background =
+      "var(--color-green-light)";
+
+    supportMessageBox.style.color =
+      "var(--color-green)";
+
+  } else {
+
+    supportMessageBox.style.background =
+      "#fee2e2";
+
+    supportMessageBox.style.color =
+      "#b91c1c";
+
+  }
+
+  supportMessageBox.textContent = message;
+}
+
+
+supportForm.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+
+  const name =
+    document.getElementById("supportName")
+      .value.trim();
+
+  const email =
+    document.getElementById("supportEmail")
+      .value.trim();
+
+  const category =
+    document.getElementById("supportCategory")
+      .value;
+
+  const message =
+    document.getElementById("supportMessage")
+      .value.trim();
+
+
+  supportMessageBox.style.display = "none";
+
+
+  /* Client-side validation */
+
+  if (!name) {
+
+    showSupportMessage(
+      t("support_enter_name"),
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (!email) {
+
+    showSupportMessage(
+      t("support_enter_email"),
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (!category) {
+
+    showSupportMessage(
+      t("support_select_issue"),
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (message.length < 5) {
+
+    showSupportMessage(
+      t("support_describe_problem"),
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* Disable button */
+
+  supportSubmitBtn.disabled = true;
+
+  supportSubmitBtn.textContent =
+    t("support_submitting");
+
+
+  try {
+
+    /*
+      IMPORTANT:
+      Use the relative API path.
+
+      This works when the page is opened through:
+
+      http://127.0.0.1:5000/supports.html
+    */
+
+    const response = await fetch(
+      "/api/support",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          category: category,
+          message: message
+        })
+      }
+    );
+
+
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      data = {};
+    }
+
+
+    if (response.ok && data.success) {
+
+      showSupportMessage(
+        "✓ " + (data.message || t("support_submit_success")),
+        "success"
+      );
+
+
+      /*
+        Reset the form, then restore saved
+        name and email if available.
+      */
+
+      supportForm.reset();
+
+
+      if (savedName) {
+        nameInput.value = savedName;
+      }
+
+      if (savedEmail) {
+        emailInput.value = savedEmail;
+      }
+
+    } else {
+
+      showSupportMessage(
+        data.message ||
+        data.error ||
+        t("support_submit_error"),
+        "error"
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Support request error:",
+      error
+    );
+
+
+    showSupportMessage(
+      t("support_connect_server"),
+      "error"
+    );
+
+  } finally {
+
+    supportSubmitBtn.disabled = false;
+
+    supportSubmitBtn.textContent =
+      t("support_submit");
+
+  }
+
+});
+</script>
+
+</body>
+</html>

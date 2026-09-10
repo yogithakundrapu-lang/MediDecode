@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simplified Report — MediDecode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <div id="app-sidebar" data-active="reports"></div>
+
+  <div class="main-col">
+    <div id="app-topbar" data-title="CBC Blood Test" data-subtitle="Uploaded 01 May 2025 · Apollo Diagnostics"></div>
+
+    <div class="content">
+
+      <div id="report-fetch-status" class="card" style="display:none;margin-bottom:20px;"></div>
+
+      <div id="report-summary-card" class="card" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="stat-icon blue">📄</div>
+          <div>
+            <h3 id="report-title" style="margin:0;font-size:15px;" data-i18n="loading_report">Loading report...</h3>
+            <p id="report-meta" style="margin:2px 0 0;font-size:12.5px;color:var(--color-text-muted);" data-i18n="fetching_report_data">Fetching latest report data…</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-outline" id="download-report-btn" type="button" data-i18n="download">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8">
+              <path d="M12 4v12M6 12l6 4 6-4"/>
+              <path d="M4 20h16"/>
+            </svg>
+            Download
+          </button>
+          <button class="btn btn-outline" data-i18n="share"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10a8 8 0 0 0-14.9-3M4 14a8 8 0 0 0 14.9 3"/></svg>Share</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;overflow-x:auto;">
+        <table class="table" style="min-width:760px;">
+          <thead>
+            <tr>
+              <th data-i18n="parameter">Parameter</th><th data-i18n="detected">Detected</th><th data-i18n="normal_range">Normal Range</th><th data-i18n="simple_meaning">Simple Meaning</th><th data-i18n="risk">Risk</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <tr>
+              <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:20px;" data-i18n="loading_report_values">Loading report values…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-1-1-1">
+        <div class="card" id="report-raw-text-card" style="display:block;">
+          <h3 style="margin:0 0 14px;font-size:15px;color:var(--color-primary);" data-i18n="extracted_report_text">📝 Extracted Report Text</h3>
+          <div id="report-raw-text" style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;white-space:pre-wrap;max-height:240px;overflow:auto;" data-i18n="loading_raw_report_text">
+            Loading raw report text…
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 14px;font-size:15px;color:var(--color-green);" data-i18n="foods_to_eat">🥗 Foods To Eat</h3>
+          <ul id="foods-to-eat"
+              style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--color-text-muted);">
+            <li data-i18n="analyzing_your_report">Analyzing your report…</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 14px;font-size:15px;color:var(--color-red);" data-i18n="foods_to_avoid">🚫 Foods To Avoid</h3>
+          <ul id="foods-to-avoid"
+              style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--color-text-muted);">
+              <li data-i18n="analyzing_your_report">Analyzing your report…</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3 style="margin:0 0 10px;font-size:15px;" data-i18n="general_advice">General Advice</h3>
+        <p id="report-advice" style="font-size:13.5px;color:var(--color-text-muted);line-height:1.7;margin:0;" data-i18n="loading_report_guidance">
+          Loading report guidance…
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app-shell.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  const REPORT_STORAGE_KEY = "medidecode_last_report_id";
+
+  function setStatus(message, type = "info") {
+    const statusEl = document.getElementById("report-fetch-status");
+    if (!statusEl) return;
+
+    statusEl.style.display = "block";
+    statusEl.style.borderLeft = "4px solid " + (type === "error" ? "#dc2626" : type === "success" ? "#2e9b69" : "#4f46e5");
+    statusEl.style.background = type === "error" ? "#fef2f2" : type === "success" ? "#f0fdf4" : "#eef2ff";
+    statusEl.style.color = type === "error" ? "#991b1b" : type === "success" ? "#166534" : "#1f2937";
+    const statusLabel = type === "error" ? t("error_loading_report") : type === "success" ? t("report_loaded") : t("loading_report");
+    statusEl.innerHTML = `<strong>${statusLabel}</strong> ${message}`;
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "—";
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return dateValue;
+
+    const locale = {
+      en: "en-GB",
+      te: "te-IN",
+      hi: "hi-IN"
+    }[getCurrentLanguage()] || "en-GB";
+
+    return date.toLocaleDateString(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
+  function renderReportMeta(report) {
+    const titleEl = document.getElementById("report-title");
+    const metaEl = document.getElementById("report-meta");
+
+    if (!titleEl || !metaEl) return;
+
+    const fileName = (report && report.file_name) ? String(report.file_name).trim() : t("medical_report");
+    const reportType = (report && report.report_type) ? String(report.report_type).toUpperCase() : "UNKNOWN";
+    const createdAt = (report && report.created_at) ? report.created_at : "";
+
+    titleEl.textContent = fileName;
+    metaEl.innerHTML = `${t("report_type")}: <strong>${reportType}</strong> · ${t("uploaded")}: <strong>${formatDate(createdAt)}</strong>`;
+  }
+
+  function badgeMarkup(level) {
+    const text = level ? String(level).trim() : t("unknown");
+    const normalText = t("normal");
+    const slightlyHighText = t("slightly_high");
+    const lowText = t("low");
+
+    if (/normal/i.test(text)) return '<span class="badge badge-green">' + normalText + '</span>';
+    if (/slightly high|high|elevated/i.test(text)) return '<span class="badge badge-amber">' + (text === "Slightly High" || text === "slightly high" ? slightlyHighText : text) + '</span>';
+    if (/low|slightly low|low risk/i.test(text)) return '<span class="badge badge-red">' + (text === "Low" || text === "low" ? lowText : text) + '</span>';
+    return '<span class="badge badge-soft">' + text + '</span>';
+  }
+
+  function extractStructuredRows(report) {
+  if (!report) return [];
+
+  // Direct parameters returned by backend
+  if (Array.isArray(report.parameters)) {
+    return report.parameters;
+  }
+
+  // Check medical_information returned by Flask
+  const medicalInfo = report.medical_information;
+
+  if (medicalInfo && typeof medicalInfo === "object") {
+
+    // Most important for blood/lab reports
+    if (Array.isArray(medicalInfo.lab_results)) {
+      return medicalInfo.lab_results;
+    }
+
+    // Other possible structured results
+    if (Array.isArray(medicalInfo.parameters)) {
+      return medicalInfo.parameters;
+    }
+
+    if (Array.isArray(medicalInfo.results)) {
+      return medicalInfo.results;
+    }
+
+    if (Array.isArray(medicalInfo.items)) {
+      return medicalInfo.items;
+    }
+
+    if (Array.isArray(medicalInfo.data)) {
+      return medicalInfo.data;
+    }
+  }
+
+  // Other possible backend formats
+  const sources = [
+    report.lab_results,
+    report.extracted_data,
+    report.values,
+    report.results
+  ];
+
+  for (const source of sources) {
+    if (Array.isArray(source)) {
+      return source;
+    }
+  }
+
+  return [];
+}
+
+  function renderTableRows(report) {
+    const tableBody = document.getElementById("report-table-body");
+    if (!tableBody) return;
+
+    const structuredRows = extractStructuredRows(report);
+
+    if (!structuredRows.length) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:20px;">
+            ${t("no_structured_values_available")}
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tableBody.innerHTML = structuredRows.map((item) => {
+      const parameter = item.parameter || item.name || item.parameter_name || t("unknown");
+      const detected = item.detected || item.value || item.detected_value || item.result || "—";
+      const range = item.normal_range || item.range || item.reference_range || "—";
+      const meaning = item.simple_meaning || item.meaning || item.description || t("no_structured_values_available");
+      const risk = item.risk_level || item.risk || item.status || item.level || t("unknown");
+      const displayRange = typeof range === "object" && range !== null
+        ? (range.low !== undefined && range.high !== undefined ? `${range.low} – ${range.high}` : JSON.stringify(range))
+        : (range === "—" ? "—" : String(range));
+
+      return `
+        <tr>
+          <td><strong>${parameter}</strong></td>
+          <td>${detected}</td>
+          <td>${displayRange}</td>
+          <td>${meaning}</td>
+          <td>${badgeMarkup(risk)}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderRawText(report) {
+    const rawTextEl = document.getElementById("report-raw-text");
+    if (!rawTextEl) return;
+
+    const rawText = report && report.raw_text ? String(report.raw_text).trim() : t("no_raw_text_available");
+    rawTextEl.textContent = rawText || t("no_raw_text_available");
+  }
+
+function renderFoodsToEat(report) {
+  const foodsEl = document.getElementById("foods-to-eat");
+  if (!foodsEl) return;
+
+  const rows = extractStructuredRows(report);
+
+  if (!rows.length) {
+    foodsEl.innerHTML = `
+      <li>${t("no_structured_lab_values")}</li>
+    `;
+    return;
+  }
+
+  const foods = [];
+
+  function addFoods(...items) {
+    items.forEach(item => {
+      if (!foods.includes(item)) {
+        foods.push(item);
+      }
+    });
+  }
+
+  function getParameter(item) {
+    return String(
+      item.parameter ||
+      item.name ||
+      item.parameter_name ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getDetected(item) {
+    return String(
+      item.detected ||
+      item.value ||
+      item.detected_value ||
+      item.result ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getRisk(item) {
+    return String(
+      item.risk_level ||
+      item.risk ||
+      item.status ||
+      item.level ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function isLow(item) {
+    const detected = getDetected(item);
+    const risk = getRisk(item);
+
+    return (
+      /low|decreased|below|deficient|deficiency/.test(detected) ||
+      /low|decreased|below|deficient|deficiency/.test(risk)
+    );
+  }
+
+  function isHigh(item) {
+    const detected = getDetected(item);
+    const risk = getRisk(item);
+
+    return (
+      /high|elevated|increased|above/.test(detected) ||
+      /high|elevated|increased|above/.test(risk)
+    );
+  }
+
+  rows.forEach(item => {
+    const parameter = getParameter(item);
+
+    if (/hemoglobin|haemoglobin|\bhb\b/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/red\s*blood\s*cell|\brbc\b|erythrocyte/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/white\s*blood\s*cell|\bwbc\b|leukocyte/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/platelet|thrombocyte/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/vitamin\s*b12|\bb12\b|cobalamin/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/folate|folic\s*acid|vitamin\s*b9|\bb9\b/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/vitamin\s*d|\b25.?oh.?d\b/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/vitamin\s*c|\bascorbic\s*acid\b/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/\biron\b|serum\s*iron|ferritin/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/glucose|blood\s*sugar|fasting\s*blood\s*sugar|hba1c|a1c/.test(parameter) && isHigh(item)) {
+      addFoods(t("reduce_sugar"), t("balanced_diet"), t("regular_exercise"));
+    }
+
+    if (/cholesterol|ldl|triglyceride/.test(parameter) && isHigh(item)) {
+      addFoods(t("balanced_diet"), t("reduce_sugar"), t("regular_exercise"));
+    }
+
+    if (/\bhdl\b|good\s*cholesterol/.test(parameter) && isLow(item)) {
+      addFoods(t("balanced_diet"), t("drink_water"), t("consult_doctor"));
+    }
+
+    if (/triglyceride/.test(parameter) && isHigh(item)) {
+      addFoods(t("reduce_sugar"), t("balanced_diet"), t("regular_exercise"));
+    }
+  });
+
+  if (!foods.length) {
+    addFoods(
+      t("balanced_diet"),
+      t("drink_water"),
+      t("regular_exercise"),
+      t("consult_doctor")
+    );
+  }
+
+  foodsEl.innerHTML = foods
+    .map(food => `<li>${food}</li>`)
+    .join("");
+}
+
+function renderFoodsToAvoid(report) {
+  const foodsEl = document.getElementById("foods-to-avoid");
+  if (!foodsEl) return;
+
+  const rows = extractStructuredRows(report);
+
+  if (!rows.length) {
+    foodsEl.innerHTML = `
+      <li>${t("no_structured_lab_values")}</li>
+    `;
+    return;
+  }
+
+  const foods = [];
+
+  function addFoods(...items) {
+    items.forEach(item => {
+      if (!foods.includes(item)) {
+        foods.push(item);
+      }
+    });
+  }
+
+  function getParameter(item) {
+    return String(
+      item.parameter ||
+      item.name ||
+      item.parameter_name ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getDetected(item) {
+    return String(
+      item.detected ||
+      item.value ||
+      item.detected_value ||
+      item.result ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getRisk(item) {
+    return String(
+      item.risk_level ||
+      item.risk ||
+      item.status ||
+      item.level ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function isLow(item) {
+    const text = getDetected(item) + " " + getRisk(item);
+    return /low|decreased|below|deficient|deficiency/.test(text);
+  }
+
+  function isHigh(item) {
+    const text = getDetected(item) + " " + getRisk(item);
+    return /high|elevated|increased|above/.test(text);
+  }
+
+  rows.forEach(item => {
+    const parameter = getParameter(item);
+
+    if (/glucose|blood\s*sugar|hba1c|a1c/.test(parameter) && isHigh(item)) {
+      addFoods(t("reduce_sugar"), t("limit_highly_processed_foods"), t("consult_doctor"));
+    }
+
+    if (/cholesterol|ldl/.test(parameter) && isHigh(item)) {
+      addFoods(t("reduce_sugar"), t("limit_highly_processed_foods"), t("consult_doctor"));
+    }
+
+    if (/triglyceride/.test(parameter) && isHigh(item)) {
+      addFoods(t("reduce_sugar"), t("limit_highly_processed_foods"), t("consult_doctor"));
+    }
+
+    if (/hemoglobin|haemoglobin|\bhb\b/.test(parameter) && isLow(item)) {
+      addFoods(t("consult_doctor"), t("balanced_diet"));
+    }
+
+    if (/\biron\b|serum\s*iron|ferritin/.test(parameter) && isLow(item)) {
+      addFoods(t("limit_highly_processed_foods"), t("consult_doctor"));
+    }
+
+    if (
+      /cholesterol|ldl|triglyceride|glucose|blood\s*sugar|hba1c|a1c/.test(parameter) &&
+      isHigh(item)
+    ) {
+      addFoods(t("limit_highly_processed_foods"));
+    }
+  });
+
+  if (!foods.length) {
+    foods.push(
+      t("no_specific_food_restriction"),
+      t("limit_highly_processed_foods")
+    );
+  }
+
+  foodsEl.innerHTML = foods
+    .map(food => `<li>${food}</li>`)
+    .join("");
+}
+
+
+
+  
+function renderAdvice(report) {
+  const adviceEl = document.getElementById("report-advice");
+  if (!adviceEl) return;
+
+  const rows = extractStructuredRows(report);
+
+  if (!rows.length) {
+    adviceEl.textContent = t("review_extracted_report_text");
+    return;
+  }
+
+  const advice = [];
+
+  function addAdvice(text) {
+    if (!advice.includes(text)) {
+      advice.push(text);
+    }
+  }
+
+  function getParameter(item) {
+    return String(
+      item.parameter ||
+      item.name ||
+      item.parameter_name ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getDetected(item) {
+    return String(
+      item.detected ||
+      item.value ||
+      item.detected_value ||
+      item.result ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function getRisk(item) {
+    return String(
+      item.risk_level ||
+      item.risk ||
+      item.status ||
+      item.level ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function isLow(item) {
+    const text = getDetected(item) + " " + getRisk(item);
+    return /low|decreased|below|deficient|deficiency/.test(text);
+  }
+
+  function isHigh(item) {
+    const text = getDetected(item) + " " + getRisk(item);
+    return /high|elevated|increased|above/.test(text);
+  }
+
+  let abnormalFinding = false;
+
+  rows.forEach(item => {
+    const parameter = getParameter(item);
+
+    if (/hemoglobin|haemoglobin|\bhb\b/.test(parameter)) {
+      if (isLow(item)) {
+        abnormalFinding = true;
+        addAdvice(t("low_hemoglobin_advice"));
+      } else if (isHigh(item)) {
+        abnormalFinding = true;
+        addAdvice(t("low_hemoglobin_advice"));
+      }
+    }
+
+    if (/red\s*blood\s*cell|\brbc\b|erythrocyte/.test(parameter)) {
+      if (isLow(item) || isHigh(item)) {
+        abnormalFinding = true;
+        addAdvice(t("consult_doctor"));
+      }
+    }
+
+    if (/white\s*blood\s*cell|\bwbc\b|leukocyte/.test(parameter)) {
+      if (isLow(item)) {
+        abnormalFinding = true;
+        addAdvice(t("abnormal_wbc_advice"));
+      } else if (isHigh(item)) {
+        abnormalFinding = true;
+        addAdvice(t("abnormal_wbc_advice"));
+      }
+    }
+
+    if (/platelet|thrombocyte/.test(parameter)) {
+      if (isLow(item)) {
+        abnormalFinding = true;
+        addAdvice(t("abnormal_platelets_advice"));
+      } else if (isHigh(item)) {
+        abnormalFinding = true;
+        addAdvice(t("abnormal_platelets_advice"));
+      }
+    }
+
+    if (/vitamin\s*b12|\bb12\b|cobalamin/.test(parameter) && isLow(item)) {
+      abnormalFinding = true;
+      addAdvice(t("low_vitamin_d_advice"));
+    }
+
+    if (/folate|folic\s*acid|vitamin\s*b9|\bb9\b/.test(parameter) && isLow(item)) {
+      abnormalFinding = true;
+      addAdvice(t("balanced_diet_lifestyle_advice"));
+    }
+
+    if (/vitamin\s*d|\b25.?oh.?d\b/.test(parameter) && isLow(item)) {
+      abnormalFinding = true;
+      addAdvice(t("low_vitamin_d_advice"));
+    }
+
+    if (/glucose|blood\s*sugar|hba1c|a1c/.test(parameter) && isHigh(item)) {
+      abnormalFinding = true;
+      addAdvice(t("high_blood_sugar_advice"));
+    }
+
+    if (/cholesterol|ldl/.test(parameter) && isHigh(item)) {
+      abnormalFinding = true;
+      addAdvice(t("high_cholesterol_advice"));
+    }
+
+    if (/triglyceride/.test(parameter) && isHigh(item)) {
+      abnormalFinding = true;
+      addAdvice(t("high_triglycerides_advice"));
+    }
+  });
+
+  if (!abnormalFinding) {
+    addAdvice(t("general_health_advice"));
+  }
+
+  addAdvice(t("review_extracted_report_text"));
+
+  adviceEl.innerHTML = advice
+    .map(item => `<div style="margin-bottom:8px;">• ${item}</div>`)
+    .join("");
+}
+
+let currentReport = null;
+
+function downloadReport() {
+  if (!currentReport) {
+    alert(t("report_still_loading"));
+    return;
+  }
+
+  const report = currentReport;
+  const rows = extractStructuredRows(report);
+
+  let content = "";
+
+  content += "========================================\n";
+  content += "             MEDIDECODE REPORT\n";
+  content += "========================================\n\n";
+
+  content += "Report: " + (report.file_name || "Medical Report") + "\n";
+  content += "Report Type: " + (report.report_type || "Unknown") + "\n";
+  content += "Uploaded: " + formatDate(report.created_at) + "\n\n";
+
+  content += "----------------------------------------\n";
+  content += "REPORT RESULTS\n";
+  content += "----------------------------------------\n\n";
+
+  if (rows.length) {
+    rows.forEach((item, index) => {
+      const parameter =
+        item.parameter ||
+        item.name ||
+        item.parameter_name ||
+        "Unknown";
+
+      const detected =
+        item.detected ||
+        item.value ||
+        item.detected_value ||
+        item.result ||
+        "—";
+
+      const range =
+        item.normal_range ||
+        item.range ||
+        item.reference_range ||
+        "—";
+
+      const meaning =
+        item.simple_meaning ||
+        item.meaning ||
+        item.description ||
+        "No simple meaning provided.";
+
+      const risk =
+        item.risk_level ||
+        item.risk ||
+        item.status ||
+        item.level ||
+        "Unknown";
+
+      let displayRange = range;
+
+      if (typeof range === "object" && range !== null) {
+        if (range.low !== undefined && range.high !== undefined) {
+          displayRange = range.low + " - " + range.high;
+        } else {
+          displayRange = JSON.stringify(range);
+        }
+      }
+
+      content += (index + 1) + ". " + parameter + "\n";
+      content += "   Detected: " + detected + "\n";
+      content += "   Normal Range: " + displayRange + "\n";
+      content += "   Simple Meaning: " + meaning + "\n";
+      content += "   Risk: " + risk + "\n\n";
+    });
+  } else {
+    content += "No structured laboratory values available.\n\n";
+  }
+
+  content += "----------------------------------------\n";
+  content += "EXTRACTED REPORT TEXT\n";
+  content += "----------------------------------------\n\n";
+
+  content +=
+    (report.raw_text || "No raw report text available.") +
+    "\n\n";
+
+  content += "----------------------------------------\n";
+  content += "FOODS TO EAT\n";
+  content += "----------------------------------------\n\n";
+
+  const foodsToEat = document.querySelectorAll("#foods-to-eat li");
+
+  foodsToEat.forEach((food, index) => {
+    content += (index + 1) + ". " + food.textContent.trim() + "\n";
+  });
+
+  content += "\n----------------------------------------\n";
+  content += "FOODS TO AVOID\n";
+  content += "----------------------------------------\n\n";
+
+  const foodsToAvoid = document.querySelectorAll("#foods-to-avoid li");
+
+  foodsToAvoid.forEach((food, index) => {
+    content += (index + 1) + ". " + food.textContent.trim() + "\n";
+  });
+
+  content += "\n----------------------------------------\n";
+  content += "GENERAL ADVICE\n";
+  content += "----------------------------------------\n\n";
+
+  const advice = document.getElementById("report-advice");
+
+  if (advice) {
+    content += advice.innerText.trim() + "\n";
+  }
+
+  content += "\n========================================\n";
+  content += "MediDecode - Medical Report Simplifier\n";
+  content += "========================================\n";
+
+  const blob = new Blob([content], {
+    type: "text/plain;charset=utf-8"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const fileName =
+    (report.file_name || "MediDecode_Report")
+      .replace(/\.[^/.]+$/, "");
+
+  const downloadName = fileName + "_Simplified_Report.txt";
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = downloadName;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
+  async function loadReportById(reportId) {
+    setStatus(t("fetching_report_data"), "info");
+
+    try {
+      const language = getCurrentLanguage();
+      const response = await fetch(`http://127.0.0.1:5000/api/reports/${reportId}?lang=${language}`, {
+        headers: {
+          "X-Language": language
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.message || t("unable_load_report") + " (HTTP " + response.status + ")";
+        setStatus(message, "error");
+        throw new Error(message);
+      }
+
+      const data = await response.json();
+      
+      // Safety check: ensure we have a report object
+      if (!data || !data.report) {
+        console.error("Invalid response structure:", data);
+        setStatus(t("invalid_server_response"), "error");
+        throw new Error("Invalid server response structure");
+      }
+
+      const report = data.report;
+      // Store the currently loaded report for Download
+      currentReport = report;
+      console.log("FULL REPORT FROM BACKEND:", report);
+      console.log("Parameters:", report.parameters);
+      console.log("Medical Info:", report.medical_information);
+
+      // Validate required fields
+      if (!report.id || !report.file_name) {
+        console.warn("Report missing basic fields:", report);
+        setStatus(t("report_data_incomplete"), "info");
+      }
+
+      renderReportMeta(report);
+      renderTableRows(report);
+      renderRawText(report);
+      renderFoodsToEat(report);
+      renderFoodsToAvoid(report);
+      renderAdvice(report);
+      setStatus(t("report_data_loaded_successfully"), "success");
+      
+    } catch (error) {
+      console.error("Load error:", error);
+      const tableBody = document.getElementById("report-table-body");
+      if (tableBody) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:20px;">
+              <strong style="color:var(--color-red);">Error loading report:</strong><br>${error.message || "Unknown error"}
+            </td>
+          </tr>
+        `;
+      }
+
+      const rawTextEl = document.getElementById("report-raw-text");
+      if (rawTextEl) {
+        rawTextEl.textContent = t("unable_load_report") + "\n\nError: " + (error.message || "Unknown error");
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const downloadButton = document.getElementById("download-report-btn");
+
+    if (downloadButton) {
+      downloadButton.addEventListener("click", downloadReport);
+    }
+    const reportId = sessionStorage.getItem(REPORT_STORAGE_KEY);
+
+    if (!reportId) {
+      setStatus(t("no_report_id_found"), "error");
+      const tableBody = document.getElementById("report-table-body");
+      if (tableBody) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:20px;">
+              ${t("upload_report_first_prompt")}
+            </td>
+          </tr>
+        `;
+      }
+      const rawTextEl = document.getElementById("report-raw-text");
+      if (rawTextEl) rawTextEl.textContent = t("no_report_data_available");
+      return;
+    }
+
+    loadReportById(reportId);
+  });
+</script>
+</body>
+</html>
