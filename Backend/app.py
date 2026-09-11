@@ -12,9 +12,13 @@ import pytesseract
 from PIL import Image, ImageOps, ImageFilter
 import pymupdf
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-app = Flask(__name__)
 FRONTEND_DIR = os.path.abspath(
 	os.path.join(os.path.dirname(__file__), "..", "frontend")
+)
+app = Flask(
+	__name__,
+	static_folder=FRONTEND_DIR,
+	static_url_path=""
 )
 CORS(app)
 app.config["UPLOAD_FOLDER"] = os.path.join(
@@ -445,6 +449,21 @@ def submit_support_request():
     
 @app.route("/")
 def home():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/index.html")
+def index_page():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/labs.html")
+def labs_page():
+    return send_from_directory(FRONTEND_DIR, "labs.html")
+
+
+@app.route("/api/status")
+def api_status():
     return jsonify({
         "message": "Medical Report Simplifier Backend is Running"
     })
